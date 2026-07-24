@@ -46,7 +46,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Boot emulator and launch Atrangi Ledger
+      - name: Boot emulator and collect launch evidence
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -56,22 +56,34 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            set -euxo pipefail
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            set +e
+            adb install -r app/build/outputs/apk/debug/app-debug.apk > install-result.txt 2>&1
+            install_code=$?
             adb logcat -c
-            adb shell am start -W -n com.atrangiriders.ledger/com.google.androidbrowserhelper.trusted.LauncherActivity | tee launch-result.txt
+            adb shell monkey -p com.atrangiriders.ledger -c android.intent.category.LAUNCHER 1 > launch-result.txt 2>&1
+            launch_code=$?
             sleep 12
-            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' | tee resumed-activity.txt || true
-            adb exec-out screencap -p > emulator-launch.png
-            adb logcat -d -v threadtime > emulator-logcat.txt
-            if grep -E -i 'FATAL EXCEPTION|Unable to start activity|Process: com\.atrangiriders\.ledger.*has died' emulator-logcat.txt; then
-              echo 'Atrangi Ledger launch crash detected.'
-              exit 1
-            fi
-            if grep -E -i 'Error type 3|Activity class .* does not exist' launch-result.txt; then
-              echo 'Launcher activity did not start.'
-              exit 1
-            fi
+            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' > resumed-activity.txt 2>&1
+            adb exec-out screencap -p > emulator-launch.png 2>/dev/null
+            adb logcat -d -v threadtime > emulator-logcat.txt 2>&1
+            printf 'install_code=%s\nlaunch_code=%s\n' "$install_code" "$launch_code" > smoke-status.txt
+            exit 0
+
+      - name: Validate launch result
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat smoke-status.txt
+          cat install-result.txt
+          cat launch-result.txt
+          cat resumed-activity.txt || true
+          grep -q 'install_code=0' smoke-status.txt
+          grep -q 'launch_code=0' smoke-status.txt
+          if grep -E -i 'FATAL EXCEPTION|Unable to start activity|Process: com\.atrangiriders\.ledger.*has died|AndroidRuntime.*com\.atrangiriders\.ledger' emulator-logcat.txt; then
+            echo 'Atrangi Ledger launch crash detected in emulator logcat.'
+            grep -E -i -C 8 'FATAL EXCEPTION|Unable to start activity|Process: com\.atrangiriders\.ledger.*has died|AndroidRuntime.*com\.atrangiriders\.ledger' emulator-logcat.txt
+            exit 1
+          fi
 
       - name: Upload emulator test evidence
         if: always()
@@ -81,7 +93,9 @@ jobs:
           path: |
             emulator-launch.png
             emulator-logcat.txt
+            install-result.txt
             launch-result.txt
             resumed-activity.txt
-          if-no-files-found: warn
+            smoke-status.txt
+          if-no-files-found: error
           retention-days: 30
