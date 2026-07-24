@@ -22,16 +22,10 @@
 
         <meta-data
             android:name="twa_generator"
-            android:value="Atrangi Ledger Android Stable TWA" />
+            android:value="Atrangi Ledger Android Crash-Safe TWA" />
 
-        <!--
-          Use the Android Browser Helper activity directly. This removes the
-          custom launcher subclass from the startup path and avoids vendor-
-          specific activity-loading failures seen on newer Motorola/Android
-          releases.
-        -->
         <activity
-            android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:name=".SafeLauncherActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|smallestScreenSize|uiMode"
             android:exported="true"
@@ -59,12 +53,7 @@
                 android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK"
                 android:resource="@color/navigation_color" />
 
-            <!--
-              Do not pass the launcher bitmap as a TWA splash drawable. The
-              previous bitmap splash path caused the app to terminate during
-              startup on the affected device. Android 12+ now uses a safe
-              vector splash supplied by values-v31/styles.xml.
-            -->
+            <!-- Android 12+ uses the safe vector system splash theme. -->
             <meta-data
                 android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
                 android:value="@string/file_provider_authority" />
