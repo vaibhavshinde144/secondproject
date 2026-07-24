@@ -43,11 +43,11 @@ jobs:
       - name: Install emulator image and enable KVM
         shell: bash
         run: |
-          yes | sdkmanager --licenses >/dev/null
+          yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platform-tools" "emulator" "system-images;android-30;google_apis;x86_64"
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+          sudo udevadm control --reload-rules || true
+          sudo udevadm trigger --name-match=kvm || true
           echo no | avdmanager create avd --force --name AtrangiApi30 --package "system-images;android-30;google_apis;x86_64" --device "pixel_2"
 
       - name: Start emulator, install and launch Atrangi Ledger
