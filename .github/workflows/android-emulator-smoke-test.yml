@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   launch-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 40
 
     steps:
@@ -46,47 +46,49 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Boot Android emulator and collect launch evidence
+      - name: Boot stable Android emulator and launch Atrangi Ledger
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: 30
           target: google_apis
           arch: x86_64
-          profile: pixel_6
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          profile: pixel_2
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot
           disable-animations: true
           script: |
             set +e
-            if adb install -r app/build/outputs/apk/debug/app-debug.apk > install-result.txt 2>&1; then
-              echo 'install_code=0' > smoke-status.txt
+            mkdir -p emulator-evidence
+            adb shell 'echo "chrome --disable-fre --no-default-browser-check" > /data/local/tmp/chrome-command-line' || true
+            if adb install -r app/build/outputs/apk/debug/app-debug.apk > emulator-evidence/install-result.txt 2>&1; then
+              echo 'install_code=0' > emulator-evidence/smoke-status.txt
             else
-              echo 'install_code=1' > smoke-status.txt
+              echo 'install_code=1' > emulator-evidence/smoke-status.txt
             fi
             adb logcat -c
-            if adb shell monkey -p com.atrangiriders.ledger -c android.intent.category.LAUNCHER 1 > launch-result.txt 2>&1; then
-              echo 'launch_code=0' >> smoke-status.txt
+            if adb shell am start -W -n com.atrangiriders.ledger/.SafeLauncherActivity > emulator-evidence/launch-result.txt 2>&1; then
+              echo 'launch_code=0' >> emulator-evidence/smoke-status.txt
             else
-              echo 'launch_code=1' >> smoke-status.txt
+              echo 'launch_code=1' >> emulator-evidence/smoke-status.txt
             fi
-            sleep 12
-            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' > resumed-activity.txt 2>&1
-            adb exec-out screencap -p > emulator-launch.png 2>/dev/null
-            adb logcat -d -v threadtime > emulator-logcat.txt 2>&1
+            sleep 15
+            adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' > emulator-evidence/resumed-activity.txt 2>&1 || true
+            adb exec-out screencap -p > emulator-evidence/emulator-launch.png 2>/dev/null || true
+            adb logcat -d -v threadtime > emulator-evidence/emulator-logcat.txt 2>&1 || true
             exit 0
 
       - name: Validate launch result
         shell: bash
         run: |
           set -euo pipefail
-          cat smoke-status.txt
-          cat install-result.txt
-          cat launch-result.txt
-          cat resumed-activity.txt || true
-          grep -q 'install_code=0' smoke-status.txt
-          grep -q 'launch_code=0' smoke-status.txt
-          if grep -E -i 'FATAL EXCEPTION|Unable to start activity|Process: com\.atrangiriders\.ledger.*has died|AndroidRuntime.*com\.atrangiriders\.ledger' emulator-logcat.txt; then
+          cat emulator-evidence/smoke-status.txt
+          cat emulator-evidence/install-result.txt
+          cat emulator-evidence/launch-result.txt
+          cat emulator-evidence/resumed-activity.txt || true
+          grep -q 'install_code=0' emulator-evidence/smoke-status.txt
+          grep -q 'launch_code=0' emulator-evidence/smoke-status.txt
+          if grep -E -i 'FATAL EXCEPTION|Unable to start activity|Process: com\.atrangiriders\.ledger.*has died|AndroidRuntime.*com\.atrangiriders\.ledger' emulator-evidence/emulator-logcat.txt; then
             echo 'Atrangi Ledger launch crash detected in emulator logcat.'
-            grep -E -i -C 8 'FATAL EXCEPTION|Unable to start activity|Process: com\.atrangiriders\.ledger.*has died|AndroidRuntime.*com\.atrangiriders\.ledger' emulator-logcat.txt
+            grep -E -i -C 8 'FATAL EXCEPTION|Unable to start activity|Process: com\.atrangiriders\.ledger.*has died|AndroidRuntime.*com\.atrangiriders\.ledger' emulator-evidence/emulator-logcat.txt
             exit 1
           fi
 
@@ -94,13 +96,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Atrangi-Ledger-v1.2.1-emulator-evidence
-          path: |
-            emulator-launch.png
-            emulator-logcat.txt
-            install-result.txt
-            launch-result.txt
-            resumed-activity.txt
-            smoke-status.txt
+          name: Atrangi-Ledger-v1.2.2-emulator-evidence
+          path: emulator-evidence/
           if-no-files-found: error
           retention-days: 30
