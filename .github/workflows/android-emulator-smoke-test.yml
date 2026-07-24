@@ -18,6 +18,8 @@ jobs:
   launch-test:
     runs-on: ubuntu-22.04
     timeout-minutes: 45
+    env:
+      ANDROID_AVD_HOME: ${{ github.workspace }}/.android/avd
 
     steps:
       - name: Checkout source
@@ -45,7 +47,10 @@ jobs:
         run: |
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platform-tools" "emulator" "system-images;android-30;google_apis;x86_64"
+          mkdir -p "$ANDROID_AVD_HOME"
           echo no | avdmanager create avd --force --name AtrangiApi30 --package "system-images;android-30;google_apis;x86_64" --device "pixel_2"
+          "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds
+          find "$ANDROID_AVD_HOME" -maxdepth 2 -type f -print
 
       - name: Start emulator, install and launch Atrangi Ledger
         shell: bash
