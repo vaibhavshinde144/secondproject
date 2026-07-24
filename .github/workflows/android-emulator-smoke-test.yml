@@ -17,7 +17,7 @@ permissions:
 jobs:
   launch-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
 
     steps:
       - name: Checkout source
@@ -46,10 +46,10 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Boot emulator and collect launch evidence
+      - name: Boot Android 16 emulator and collect launch evidence
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: 36
           target: google_apis
           arch: x86_64
           profile: pixel_6
@@ -57,16 +57,21 @@ jobs:
           disable-animations: true
           script: |
             set +e
-            adb install -r app/build/outputs/apk/debug/app-debug.apk > install-result.txt 2>&1
-            install_code=$?
+            if adb install -r app/build/outputs/apk/debug/app-debug.apk > install-result.txt 2>&1; then
+              echo 'install_code=0' > smoke-status.txt
+            else
+              echo 'install_code=1' > smoke-status.txt
+            fi
             adb logcat -c
-            adb shell monkey -p com.atrangiriders.ledger -c android.intent.category.LAUNCHER 1 > launch-result.txt 2>&1
-            launch_code=$?
+            if adb shell monkey -p com.atrangiriders.ledger -c android.intent.category.LAUNCHER 1 > launch-result.txt 2>&1; then
+              echo 'launch_code=0' >> smoke-status.txt
+            else
+              echo 'launch_code=1' >> smoke-status.txt
+            fi
             sleep 12
             adb shell dumpsys activity activities | grep -E 'mResumedActivity|topResumedActivity' > resumed-activity.txt 2>&1
             adb exec-out screencap -p > emulator-launch.png 2>/dev/null
             adb logcat -d -v threadtime > emulator-logcat.txt 2>&1
-            printf 'install_code=%s\nlaunch_code=%s\n' "$install_code" "$launch_code" > smoke-status.txt
             exit 0
 
       - name: Validate launch result
@@ -80,7 +85,7 @@ jobs:
           grep -q 'install_code=0' smoke-status.txt
           grep -q 'launch_code=0' smoke-status.txt
           if grep -E -i 'FATAL EXCEPTION|Unable to start activity|Process: com\.atrangiriders\.ledger.*has died|AndroidRuntime.*com\.atrangiriders\.ledger' emulator-logcat.txt; then
-            echo 'Atrangi Ledger launch crash detected in emulator logcat.'
+            echo 'Atrangi Ledger launch crash detected in Android 16 emulator logcat.'
             grep -E -i -C 8 'FATAL EXCEPTION|Unable to start activity|Process: com\.atrangiriders\.ledger.*has died|AndroidRuntime.*com\.atrangiriders\.ledger' emulator-logcat.txt
             exit 1
           fi
@@ -89,7 +94,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Atrangi-Ledger-v1.2.0-emulator-evidence
+          name: Atrangi-Ledger-v1.2.1-Android-16-emulator-evidence
           path: |
             emulator-launch.png
             emulator-logcat.txt
