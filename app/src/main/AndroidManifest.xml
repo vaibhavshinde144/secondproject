@@ -22,10 +22,10 @@
 
         <meta-data
             android:name="twa_generator"
-            android:value="Atrangi Ledger Android Professional TWA" />
+            android:value="Atrangi Ledger Android Crash-Safe TWA" />
 
         <activity
-            android:name=".LauncherActivity"
+            android:name=".SafeLauncherActivity"
             android:alwaysRetainTaskState="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|smallestScreenSize|uiMode"
             android:exported="true"
@@ -53,18 +53,7 @@
                 android:name="android.support.customtabs.trusted.NAVIGATION_BAR_COLOR_DARK"
                 android:resource="@color/navigation_color" />
 
-            <meta-data
-                android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
-                android:resource="@mipmap/ic_launcher" />
-
-            <meta-data
-                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_BACKGROUND_COLOR"
-                android:resource="@color/background_color" />
-
-            <meta-data
-                android:name="android.support.customtabs.trusted.SPLASH_SCREEN_FADE_OUT_DURATION"
-                android:value="250" />
-
+            <!-- Android 12+ uses the safe vector system splash theme. -->
             <meta-data
                 android:name="android.support.customtabs.trusted.FILE_PROVIDER_AUTHORITY"
                 android:value="@string/file_provider_authority" />
