@@ -1,7 +1,6 @@
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
-import java.util.Base64
 
 plugins {
     id 'com.android.application'
@@ -43,12 +42,12 @@ dependencies {
     implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
 }
 
-// Generate every Android launcher density from the exact Atrangi Ledger web-app logo.
-def launcherLogoBase64 = file("$projectDir/branding/atrangi_launcher_logo_192.b64")
+// Generate every Android launcher density from the exact maskable logo used by the Atrangi Ledger web app.
+def launcherLogoUrl = 'https://atrangi-ledger.web.app/icon-maskable-512.png'
 def launcherIconSizes = [mdpi: 48, hdpi: 72, xhdpi: 96, xxhdpi: 144, xxxhdpi: 192]
 
 tasks.register('generateAtrangiLauncherIcons') {
-    inputs.file(launcherLogoBase64)
+    outputs.upToDateWhen { false }
     outputs.files(launcherIconSizes.collectMany { density, size ->
         [
             file("src/main/res/mipmap-${density}/ic_launcher.png"),
@@ -57,10 +56,12 @@ tasks.register('generateAtrangiLauncherIcons') {
     })
 
     doLast {
-        byte[] decodedLogo = Base64.decoder.decode(launcherLogoBase64.getText('UTF-8').trim())
-        BufferedImage sourceLogo = ImageIO.read(new ByteArrayInputStream(decodedLogo))
+        BufferedImage sourceLogo
+        new URL(launcherLogoUrl).openStream().withCloseable { inputStream ->
+            sourceLogo = ImageIO.read(inputStream)
+        }
         if (sourceLogo == null) {
-            throw new GradleException('Unable to decode Atrangi Ledger launcher logo.')
+            throw new GradleException("Unable to download or decode Atrangi Ledger launcher logo from ${launcherLogoUrl}")
         }
 
         launcherIconSizes.each { density, size ->
