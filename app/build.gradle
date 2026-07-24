@@ -13,9 +13,9 @@ android {
     defaultConfig {
         applicationId 'com.atrangiriders.ledger'
         minSdk 23
-        targetSdk 35
-        versionCode 5
-        versionName '1.2.0'
+        targetSdk 36
+        versionCode 6
+        versionName '1.2.1'
     }
 
     buildTypes {
@@ -39,7 +39,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.2'
 }
 
 // Generate every Android launcher density from the exact maskable logo used by the Atrangi Ledger web app.
