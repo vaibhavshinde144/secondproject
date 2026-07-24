@@ -17,7 +17,7 @@ permissions:
 jobs:
   launch-test:
     runs-on: ubuntu-22.04
-    timeout-minutes: 45
+    timeout-minutes: 35
     env:
       ANDROID_AVD_HOME: ${{ github.workspace }}/.android/avd
 
@@ -42,15 +42,15 @@ jobs:
       - name: Build APK for emulator
         run: gradle --no-daemon clean :app:assembleDebug
 
-      - name: Install emulator image
+      - name: Install emulator image and configure KVM
         shell: bash
         run: |
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platform-tools" "emulator" "system-images;android-30;google_apis;x86_64"
           mkdir -p "$ANDROID_AVD_HOME"
           echo no | avdmanager create avd --force --name AtrangiApi30 --package "system-images;android-30;google_apis;x86_64" --device "pixel_2"
+          sudo chmod 666 /dev/kvm || true
           "$ANDROID_SDK_ROOT/emulator/emulator" -list-avds
-          find "$ANDROID_AVD_HOME" -maxdepth 2 -type f -print
 
       - name: Start emulator, install and launch Atrangi Ledger
         shell: bash
@@ -58,19 +58,19 @@ jobs:
           set -u
           mkdir -p emulator-evidence
           "$ANDROID_SDK_ROOT/emulator/emulator" @AtrangiApi30 \
-            -no-window -noaudio -no-boot-anim -no-snapshot -accel off -gpu swiftshader_indirect \
+            -no-window -noaudio -no-boot-anim -no-snapshot -accel on -gpu swiftshader_indirect \
             > emulator-evidence/emulator-boot.txt 2>&1 &
           emulator_pid=$!
           echo "$emulator_pid" > emulator-evidence/emulator-pid.txt
 
-          if ! timeout 180 adb wait-for-device; then
+          if ! timeout 120 adb wait-for-device; then
             echo 'emulator_boot_code=1' > emulator-evidence/smoke-status.txt
             adb devices -l > emulator-evidence/adb-devices.txt 2>&1 || true
             cat emulator-evidence/emulator-boot.txt || true
             exit 1
           fi
 
-          if ! timeout 360 bash -c 'until [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == "1" ]]; do sleep 5; done'; then
+          if ! timeout 240 bash -c 'until [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == "1" ]]; do sleep 4; done'; then
             echo 'emulator_boot_code=1' > emulator-evidence/smoke-status.txt
             adb devices -l > emulator-evidence/adb-devices.txt 2>&1 || true
             cat emulator-evidence/emulator-boot.txt || true
