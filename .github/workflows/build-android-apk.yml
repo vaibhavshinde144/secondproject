@@ -44,30 +44,56 @@ jobs:
       - name: Install Android SDK packages
         run: |
           yes | sdkmanager --licenses >/dev/null
-          sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+          sdkmanager "platforms;android-36" "build-tools;35.0.0" "platform-tools"
 
-      - name: Set up Gradle 8.9
+      - name: Set up Gradle 8.13
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
+          gradle-version: '8.13'
 
       - name: Build installable APK
-        run: gradle --no-daemon clean :app:assembleDebug
+        id: android_build
+        shell: bash
+        run: |
+          set +e
+          set -o pipefail
+          gradle --no-daemon clean :app:assembleDebug 2>&1 | tee android-build.log
+          code=${PIPESTATUS[0]}
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Upload build diagnostic log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Atrangi-Ledger-Android-build-log
+          path: android-build.log
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Verify APK signature
+        if: steps.android_build.outputs.exit_code == '0'
         run: |
           APKSIGNER="$ANDROID_SDK_ROOT/build-tools/35.0.0/apksigner"
-          "$APKSIGNER" verify --verbose --print-certs app/build/outputs/apk/debug/app-debug.apk
+          "$APKSIGNER" verify --verbose --print-certs app/build/outputs/apk/debug/app-debug.apk | tee apk-signature-verification.txt
 
       - name: Prepare shareable APK
+        if: steps.android_build.outputs.exit_code == '0'
         run: |
           mkdir -p release-output
           cp app/build/outputs/apk/debug/app-debug.apk release-output/Atrangi_Ledger_Android_v1.0.0.apk
+          cp apk-signature-verification.txt release-output/APK_SIGNATURE_VERIFICATION.txt
+          sha256sum release-output/Atrangi_Ledger_Android_v1.0.0.apk | tee release-output/APK_SHA256.txt
 
       - name: Upload APK artifact
+        if: steps.android_build.outputs.exit_code == '0'
         uses: actions/upload-artifact@v4
         with:
           name: Atrangi-Ledger-Android-v1.0.0
-          path: release-output/Atrangi_Ledger_Android_v1.0.0.apk
+          path: release-output/
           if-no-files-found: error
           retention-days: 90
+
+      - name: Fail when Android build failed
+        if: steps.android_build.outputs.exit_code != '0'
+        run: exit 1
