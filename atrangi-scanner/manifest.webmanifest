@@ -1,0 +1,11 @@
+{
+  "name": "Atrangi Scanner",
+  "short_name": "Scanner",
+  "description": "Private on-device document scanner and exporter.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "orientation": "any",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
