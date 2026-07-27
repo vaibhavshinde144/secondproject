@@ -1,0 +1,63 @@
+name: Deploy Atrangi Scanner to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'atrangi-scanner/**'
+      - '.github/workflows/deploy-atrangi-scanner-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare site
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/atrangi-scanner
+          cp -R atrangi-scanner/. _site/atrangi-scanner/
+          cat > _site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <meta http-equiv="refresh" content="0; url=./atrangi-scanner/">
+            <title>Atrangi Scanner</title>
+          </head>
+          <body>
+            <p>Opening Atrangi Scanner… <a href="./atrangi-scanner/">Continue</a></p>
+          </body>
+          </html>
+          HTML
+          touch _site/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
