@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="110" fill="#07111f"/>
+  <rect x="62" y="62" width="388" height="388" rx="76" fill="#102238" stroke="#52d3b8" stroke-width="10"/>
+  <g fill="none" stroke="#95f2df" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M132 210v-78h78M380 210v-78h-78M132 302v78h78M380 302v78h-78"/>
+  </g>
+  <text x="256" y="292" text-anchor="middle" font-family="Arial,sans-serif" font-size="112" font-weight="800" fill="#95f2df">AS</text>
+</svg>
