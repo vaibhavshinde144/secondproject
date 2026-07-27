@@ -1,0 +1,3 @@
+const test=require('node:test');const assert=require('node:assert/strict');const Q=require('../scan-quality.js');
+test('v1.1 flags strong blur and recommends retake',()=>{const q=Q.classifyScanQuality({sharpness:25,brightness:145,contrast:50});assert.equal(q.sharpLabel,'blurry');assert.equal(q.needsSmartClear,true);assert.equal(q.retakeRecommended,true)});
+test('v1.1 accepts clear balanced scan',()=>{const q=Q.classifyScanQuality({sharpness:520,brightness:170,contrast:55});assert.ok(['good','excellent'].includes(q.sharpLabel));assert.equal(q.exposure,'good');assert.equal(q.lowContrast,false);assert.equal(q.retakeRecommended,false)});
