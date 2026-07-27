@@ -9,6 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="v11.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -28,7 +29,7 @@
         <div class="hero-copy">
           <span class="pill private">🔒 Private on-device processing</span>
           <h2>Turn photos into clean documents.</h2>
-          <p>Capture with your camera or choose images from your gallery. Reorder, crop, rotate and enhance pages, then export as PDF, Word-compatible document, JPEG or PNG.</p>
+          <p>Capture with your camera or gallery. Atrangi Scanner checks blur, brightness and contrast, applies Smart Clear when useful, then lets you crop, rotate and choose Original, Enhance, Grayscale or Black &amp; White before export.</p>
         </div>
         <div class="hero-stats">
           <div><strong id="pageCount">0</strong><span>Pages</span></div>
@@ -41,8 +42,8 @@
         <div class="type-grid" id="typeGrid" role="radiogroup" aria-label="Document type"></div>
       </section>
 
-      <section class="card capture-card">
-        <div class="section-heading"><div><span class="eyebrow">2. ADD PAGES</span><h3>Camera or gallery</h3></div><span class="hint" id="pairHint"></span></div>
+      <section class="card capture-card" id="captureCard">
+        <div class="section-heading"><div><span class="eyebrow">2. CAPTURE</span><h3>Camera or gallery</h3></div><span class="hint" id="pairHint"></span></div>
         <div class="capture-actions">
           <button class="primary big-action" id="cameraBtn"><span class="action-icon">📷</span><span><b>Take Photo</b><small>Use rear camera</small></span></button>
           <button class="secondary big-action" id="galleryBtn"><span class="action-icon">🖼️</span><span><b>Choose from Gallery</b><small>Select one or many</small></span></button>
@@ -54,17 +55,31 @@
 
       <section class="card pages-card" id="pagesSection" hidden>
         <div class="section-heading">
-          <div><span class="eyebrow">3. REVIEW</span><h3>Pages</h3></div>
-          <div class="compact-actions"><button class="ghost" id="enhanceAllBtn">Enhance all</button><button class="danger-text" id="clearBtn">Clear</button></div>
+          <div><span class="eyebrow">3. REVIEW &amp; CONFIRM</span><h3>Scanned pages</h3></div>
+          <div class="compact-actions"><button class="ghost" id="smartAllBtn">Smart Clear all</button><button class="ghost" id="enhanceAllBtn">Enhance all</button><button class="danger-text" id="clearBtn">Remove document</button></div>
         </div>
         <div class="pages-list" id="pagesList"></div>
         <div class="paired-preview" id="pairedPreview" hidden>
           <b>Paired-card export:</b> front and back are placed together on the same output page. Pages 1+2 become sheet 1, pages 3+4 become sheet 2, and so on.
         </div>
+        <div class="scan-confirm" id="scanConfirm">
+          <div><b>Finished capturing this document?</b><small>Confirming locks the normal camera/gallery area. You can still edit, rotate, remove, or deliberately add pages later.</small></div>
+          <button class="primary" id="completeScanBtn">✓ Scan Complete</button>
+        </div>
+      </section>
+
+      <section class="card completed-card" id="completedCard" hidden>
+        <div class="section-heading"><div><span class="eyebrow">SCAN COMPLETE</span><h3>Document locked for review</h3></div><span class="status-pill">✓ Complete</span></div>
+        <p class="completed-note">Normal Take Photo / Choose from Gallery controls are hidden. Existing pages remain fully editable.</p>
+        <div class="completed-actions">
+          <button class="secondary" id="addPageBtn">＋ Add Page / Photo</button>
+          <button class="secondary" id="addDocumentBtn">＋ Add Document Pages</button>
+          <button class="danger-text" id="removeDocumentBtn">Remove Entire Document</button>
+        </div>
       </section>
 
       <section class="export-dock" id="exportDock" hidden>
-        <div><b id="dockCount">0 pages ready</b><small>Review pages before export</small></div>
+        <div><b id="dockCount">0 pages ready</b><small id="dockHint">Confirm Scan Complete before export</small></div>
         <button class="primary" id="exportBtn">Export Scan</button>
       </section>
     </main>
@@ -75,20 +90,24 @@
   <dialog id="editDialog" class="modal edit-modal">
     <form method="dialog" class="modal-card" id="editForm">
       <div class="modal-head"><div><span class="eyebrow">PAGE EDITOR</span><h3 id="editTitle">Edit page</h3></div><button class="close-btn" value="cancel" aria-label="Close">×</button></div>
+      <div class="quality-banner" id="qualityBanner">Analyzing scan quality…</div>
       <div class="edit-preview-wrap"><canvas id="editCanvas"></canvas></div>
       <div class="tool-row">
+        <button type="button" class="tool" data-filter="smart">✨ Smart Clear</button>
         <button type="button" class="tool active" data-filter="original">Original</button>
         <button type="button" class="tool" data-filter="enhance">Enhance</button>
-        <button type="button" class="tool" data-filter="grayscale">Gray</button>
-        <button type="button" class="tool" data-filter="bw">B&amp;W</button>
+        <button type="button" class="tool" data-filter="clarity">Clarity</button>
+        <button type="button" class="tool" data-filter="grayscale">Gray Scan</button>
+        <button type="button" class="tool" data-filter="bw">B&amp;W Scan</button>
       </div>
+      <div class="crop-actions"><button type="button" class="secondary" id="smartCropBtn">▣ Smart Crop</button><button type="button" class="ghost" id="resetCropBtn">Reset Crop</button></div>
       <div class="edit-controls">
         <div class="control-group"><label>Crop left <span id="cropLeftVal">0%</span></label><input id="cropLeft" type="range" min="0" max="35" value="0" /></div>
         <div class="control-group"><label>Crop right <span id="cropRightVal">0%</span></label><input id="cropRight" type="range" min="0" max="35" value="0" /></div>
         <div class="control-group"><label>Crop top <span id="cropTopVal">0%</span></label><input id="cropTop" type="range" min="0" max="35" value="0" /></div>
         <div class="control-group"><label>Crop bottom <span id="cropBottomVal">0%</span></label><input id="cropBottom" type="range" min="0" max="35" value="0" /></div>
       </div>
-      <div class="modal-actions"><button type="button" class="secondary" id="rotateLeftBtn">↶ Rotate</button><button type="button" class="secondary" id="rotateRightBtn">Rotate ↷</button><button type="button" class="primary" id="saveEditBtn">Save Page</button></div>
+      <div class="modal-actions"><button type="button" class="secondary" id="rotateLeftBtn">↶ Rotate Left</button><button type="button" class="secondary" id="rotateRightBtn">Rotate Right ↷</button><button type="button" class="primary" id="saveEditBtn">Save &amp; Accept Page</button></div>
     </form>
   </dialog>
 
@@ -113,7 +132,7 @@
   <dialog id="helpDialog" class="modal">
     <form method="dialog" class="modal-card help-card">
       <div class="modal-head"><div><span class="eyebrow">HELP</span><h3>How Atrangi Scanner works</h3></div><button class="close-btn" value="cancel">×</button></div>
-      <ol><li>Select a scan type.</li><li>Take a photo or choose images from your gallery.</li><li>Use Edit to crop, rotate and apply document filters.</li><li>Reorder pages with the up/down buttons.</li><li>Export to PDF, Word-compatible document or images.</li></ol>
+      <ol><li>Select a scan type.</li><li>Take a photo or choose images. Every new page is checked for blur, exposure and contrast.</li><li>Review Smart Clear, Original, Enhance, Clarity, Gray Scan or B&amp;W Scan. Use Smart Crop or manual crop and rotate as required.</li><li>Reorder or remove pages, then press Scan Complete. Normal capture controls are hidden after confirmation.</li><li>After completion you can still Edit, Rotate, Remove, Add Page / Photo, Add Document Pages, or export to PDF, Word-compatible document or images.</li></ol>
       <p><b>Privacy:</b> scanning and export are performed locally in your browser. The app has no server upload feature.</p>
       <p><b>Camera:</b> browser camera capture requires HTTPS on mobile. GitHub Pages provides HTTPS.</p>
       <div class="modal-actions"><button class="primary" value="ok">Got it</button></div>
@@ -123,6 +142,10 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="scanner-core.js"></script>
-  <script src="app.js"></script>
+  <script src="scan-quality.js"></script>
+  <script src="v11-state.js"></script>
+  <script src="v11-image.js"></script>
+  <script src="v11-export.js"></script>
+  <script src="v11-app.js"></script>
 </body>
 </html>
