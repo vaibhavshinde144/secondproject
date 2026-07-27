@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="description" content="Atrangi Scanner - private, device-side document scanning and export." />
+  <title>Atrangi Scanner</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <div class="logo" aria-hidden="true"><span>AS</span></div>
+        <div><h1>Atrangi Scanner</h1><p>Scan • Enhance • Export</p></div>
+      </div>
+      <div class="top-actions">
+        <button class="ghost icon-btn" id="installBtn" hidden title="Install app">Install</button>
+        <button class="ghost icon-btn" id="helpBtn" title="Help">?</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero card">
+        <div class="hero-copy">
+          <span class="pill private">🔒 Private on-device processing</span>
+          <h2>Turn photos into clean documents.</h2>
+          <p>Capture with your camera or choose images from your gallery. Reorder, crop, rotate and enhance pages, then export as PDF, Word-compatible document, JPEG or PNG.</p>
+        </div>
+        <div class="hero-stats">
+          <div><strong id="pageCount">0</strong><span>Pages</span></div>
+          <div><strong id="typeLabel">Document</strong><span>Scan type</span></div>
+        </div>
+      </section>
+
+      <section class="card scan-setup">
+        <div class="section-heading"><div><span class="eyebrow">1. SCAN TYPE</span><h3>What are you scanning?</h3></div><span class="hint">Change anytime</span></div>
+        <div class="type-grid" id="typeGrid" role="radiogroup" aria-label="Document type"></div>
+      </section>
+
+      <section class="card capture-card">
+        <div class="section-heading"><div><span class="eyebrow">2. ADD PAGES</span><h3>Camera or gallery</h3></div><span class="hint" id="pairHint"></span></div>
+        <div class="capture-actions">
+          <button class="primary big-action" id="cameraBtn"><span class="action-icon">📷</span><span><b>Take Photo</b><small>Use rear camera</small></span></button>
+          <button class="secondary big-action" id="galleryBtn"><span class="action-icon">🖼️</span><span><b>Choose from Gallery</b><small>Select one or many</small></span></button>
+        </div>
+        <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden />
+        <input id="galleryInput" type="file" accept="image/*" multiple hidden />
+        <div class="drop-zone" id="dropZone" tabindex="0">Drop images here on laptop/desktop</div>
+      </section>
+
+      <section class="card pages-card" id="pagesSection" hidden>
+        <div class="section-heading">
+          <div><span class="eyebrow">3. REVIEW</span><h3>Pages</h3></div>
+          <div class="compact-actions"><button class="ghost" id="enhanceAllBtn">Enhance all</button><button class="danger-text" id="clearBtn">Clear</button></div>
+        </div>
+        <div class="pages-list" id="pagesList"></div>
+        <div class="paired-preview" id="pairedPreview" hidden>
+          <b>Paired-card export:</b> front and back are placed together on the same output page. Pages 1+2 become sheet 1, pages 3+4 become sheet 2, and so on.
+        </div>
+      </section>
+
+      <section class="export-dock" id="exportDock" hidden>
+        <div><b id="dockCount">0 pages ready</b><small>Review pages before export</small></div>
+        <button class="primary" id="exportBtn">Export Scan</button>
+      </section>
+    </main>
+
+    <footer>Atrangi Scanner • Responsive PWA • Files stay on your device unless you choose to share them</footer>
+  </div>
+
+  <dialog id="editDialog" class="modal edit-modal">
+    <form method="dialog" class="modal-card" id="editForm">
+      <div class="modal-head"><div><span class="eyebrow">PAGE EDITOR</span><h3 id="editTitle">Edit page</h3></div><button class="close-btn" value="cancel" aria-label="Close">×</button></div>
+      <div class="edit-preview-wrap"><canvas id="editCanvas"></canvas></div>
+      <div class="tool-row">
+        <button type="button" class="tool active" data-filter="original">Original</button>
+        <button type="button" class="tool" data-filter="enhance">Enhance</button>
+        <button type="button" class="tool" data-filter="grayscale">Gray</button>
+        <button type="button" class="tool" data-filter="bw">B&amp;W</button>
+      </div>
+      <div class="edit-controls">
+        <div class="control-group"><label>Crop left <span id="cropLeftVal">0%</span></label><input id="cropLeft" type="range" min="0" max="35" value="0" /></div>
+        <div class="control-group"><label>Crop right <span id="cropRightVal">0%</span></label><input id="cropRight" type="range" min="0" max="35" value="0" /></div>
+        <div class="control-group"><label>Crop top <span id="cropTopVal">0%</span></label><input id="cropTop" type="range" min="0" max="35" value="0" /></div>
+        <div class="control-group"><label>Crop bottom <span id="cropBottomVal">0%</span></label><input id="cropBottom" type="range" min="0" max="35" value="0" /></div>
+      </div>
+      <div class="modal-actions"><button type="button" class="secondary" id="rotateLeftBtn">↶ Rotate</button><button type="button" class="secondary" id="rotateRightBtn">Rotate ↷</button><button type="button" class="primary" id="saveEditBtn">Save Page</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="exportDialog" class="modal export-modal">
+    <form method="dialog" class="modal-card" id="exportForm">
+      <div class="modal-head"><div><span class="eyebrow">EXPORT</span><h3>Create your document</h3></div><button class="close-btn" value="cancel" aria-label="Close">×</button></div>
+      <div class="export-grid">
+        <label class="field full"><span>File name</span><input id="fileName" type="text" value="Atrangi_Scan" maxlength="80" /></label>
+        <label class="field"><span>Document type</span><select id="format"><option value="pdf">PDF</option><option value="word">Word-compatible (.doc)</option><option value="images">Images</option></select></label>
+        <label class="field"><span>Quality</span><select id="quality"><option value="low">Low</option><option value="medium">Medium</option><option value="high" selected>High</option><option value="veryHigh">Very High</option><option value="ultraHigh">Ultra High</option><option value="excellent">Excellent</option></select></label>
+        <label class="field"><span>Page size</span><select id="pageSize"><option value="a4" selected>A4</option><option value="a3">A3</option><option value="a5">A5</option><option value="letter">Letter</option><option value="legal">Legal</option><option value="id">ID Card</option><option value="original">Original ratio</option></select></label>
+        <label class="field"><span>Orientation</span><select id="orientation"><option value="auto">Auto</option><option value="portrait" selected>Portrait</option><option value="landscape">Landscape</option></select></label>
+        <label class="field"><span>Margins</span><select id="margin"><option value="0">None</option><option value="12">Narrow</option><option value="24" selected>Normal</option></select></label>
+        <label class="field" id="imageFormatField" hidden><span>Image format</span><select id="imageFormat"><option value="jpeg">JPEG</option><option value="png">PNG</option></select></label>
+      </div>
+      <div class="export-summary" id="exportSummary"></div>
+      <div class="progress-wrap" id="progressWrap" hidden><div class="progress-label"><span id="progressText">Preparing…</span><span id="progressPercent">0%</span></div><div class="progress"><i id="progressBar"></i></div></div>
+      <div class="modal-actions"><button class="secondary" value="cancel">Cancel</button><button type="button" class="primary" id="createExportBtn">Create Export</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="helpDialog" class="modal">
+    <form method="dialog" class="modal-card help-card">
+      <div class="modal-head"><div><span class="eyebrow">HELP</span><h3>How Atrangi Scanner works</h3></div><button class="close-btn" value="cancel">×</button></div>
+      <ol><li>Select a scan type.</li><li>Take a photo or choose images from your gallery.</li><li>Use Edit to crop, rotate and apply document filters.</li><li>Reorder pages with the up/down buttons.</li><li>Export to PDF, Word-compatible document or images.</li></ol>
+      <p><b>Privacy:</b> scanning and export are performed locally in your browser. The app has no server upload feature.</p>
+      <p><b>Camera:</b> browser camera capture requires HTTPS on mobile. GitHub Pages provides HTTPS.</p>
+      <div class="modal-actions"><button class="primary" value="ok">Got it</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="scanner-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
