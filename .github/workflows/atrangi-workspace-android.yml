@@ -9,7 +9,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'atrangi-document-workspace/seed/**'
+      - 'atrangi-document-workspace/seed-xz/**'
       - '.github/workflows/atrangi-workspace-android.yml'
   workflow_dispatch:
 
@@ -35,11 +35,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat atrangi-document-workspace/seed/part-*.b64 > /tmp/atrangi-project.b64
-          base64 -d /tmp/atrangi-project.b64 > /tmp/atrangi-project.zip
+          cat atrangi-document-workspace/seed-xz/part-*.b64 > /tmp/atrangi-project.b64
+          base64 -d /tmp/atrangi-project.b64 > /tmp/atrangi-project.tar.xz
           rm -rf /tmp/atrangi-unpacked
           mkdir -p /tmp/atrangi-unpacked
-          unzip -q /tmp/atrangi-project.zip -d /tmp/atrangi-unpacked
+          tar -xJf /tmp/atrangi-project.tar.xz -C /tmp/atrangi-unpacked
           echo "PROJECT_DIR=/tmp/atrangi-unpacked/Atrangi_Document_Workspace_Android_v1_Lean" >> "$GITHUB_ENV"
       - name: Build Android debug APK
         shell: bash
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Atrangi-Document-Workspace-Source
-          path: /tmp/atrangi-project.zip
+          path: /tmp/atrangi-project.tar.xz
 
   publish:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -74,17 +74,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat atrangi-document-workspace/seed/part-*.b64 > /tmp/atrangi-project.b64
-          base64 -d /tmp/atrangi-project.b64 > /tmp/atrangi-project.zip
+          cat atrangi-document-workspace/seed-xz/part-*.b64 > /tmp/atrangi-project.b64
+          base64 -d /tmp/atrangi-project.b64 > /tmp/atrangi-project.tar.xz
           rm -rf /tmp/atrangi-unpacked
           mkdir -p /tmp/atrangi-unpacked
-          unzip -q /tmp/atrangi-project.zip -d /tmp/atrangi-unpacked
+          tar -xJf /tmp/atrangi-project.tar.xz -C /tmp/atrangi-unpacked
           P=/tmp/atrangi-unpacked/Atrangi_Document_Workspace_Android_v1_Lean
           rm -rf atrangi-document-workspace/source
           mkdir -p atrangi-document-workspace/source atrangi-document-workspace/releases
           cp -R "$P"/. atrangi-document-workspace/source/
           cp /tmp/apk/Atrangi-Document-Workspace-v1-debug.apk atrangi-document-workspace/releases/
-          cp /tmp/atrangi-project.zip atrangi-document-workspace/releases/Atrangi-Document-Workspace-v1-Source.zip
+          cp /tmp/atrangi-project.tar.xz atrangi-document-workspace/releases/Atrangi-Document-Workspace-v1-Source.tar.xz
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add atrangi-document-workspace/source atrangi-document-workspace/releases
