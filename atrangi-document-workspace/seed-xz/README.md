@@ -1,0 +1,1 @@
+Build seed chunks for Atrangi Document Workspace Android v1. GitHub Actions reconstructs the Android project from these parts.
