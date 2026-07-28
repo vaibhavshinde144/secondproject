@@ -40,7 +40,7 @@ jobs:
           rm -rf /tmp/atrangi-unpacked
           mkdir -p /tmp/atrangi-unpacked
           unzip -q /tmp/atrangi-project.zip -d /tmp/atrangi-unpacked
-          echo "PROJECT_DIR=/tmp/atrangi-unpacked/Atrangi_Document_Workspace_Android_v1_Optimized" >> "$GITHUB_ENV"
+          echo "PROJECT_DIR=/tmp/atrangi-unpacked/Atrangi_Document_Workspace_Android_v1_Lean" >> "$GITHUB_ENV"
       - name: Build Android debug APK
         shell: bash
         run: |
@@ -79,7 +79,7 @@ jobs:
           rm -rf /tmp/atrangi-unpacked
           mkdir -p /tmp/atrangi-unpacked
           unzip -q /tmp/atrangi-project.zip -d /tmp/atrangi-unpacked
-          P=/tmp/atrangi-unpacked/Atrangi_Document_Workspace_Android_v1_Optimized
+          P=/tmp/atrangi-unpacked/Atrangi_Document_Workspace_Android_v1_Lean
           rm -rf atrangi-document-workspace/source
           mkdir -p atrangi-document-workspace/source atrangi-document-workspace/releases
           cp -R "$P"/. atrangi-document-workspace/source/
@@ -92,7 +92,7 @@ jobs:
           git push
           rm -rf /tmp/pages
           mkdir -p /tmp/pages
-          cp -R "$P/website"/. /tmp/pages/
+          cp -R "$P/app/src/main/assets/www"/. /tmp/pages/
           touch /tmp/pages/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
