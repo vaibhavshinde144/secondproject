@@ -1,0 +1,1 @@
+Atrangi Document Workspace Android v1 build branch. Source package is reconstructed by GitHub Actions and builds a debug APK plus GitHub Pages website.
