@@ -1,5 +1,6 @@
 name: Build Business Tycoon v6 APK
 
+# Complete v6 source is uploaded; this revision starts the final verified build.
 on:
   push:
     branches: [business-tycoon-v6]
