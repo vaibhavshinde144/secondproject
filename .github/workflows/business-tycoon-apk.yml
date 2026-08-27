@@ -56,9 +56,9 @@ jobs:
               defaultConfig {
                   applicationId 'com.aurelius.businesstycoon'
                   minSdk 24
-                  targetSdk 35
-                  versionCode 1
-                  versionName '1.0.0'
+                  targetSdk 34
+                  versionCode 2
+                  versionName '2.0.0'
               }
               buildTypes {
                   debug { minifyEnabled false }
@@ -70,8 +70,16 @@ jobs:
           cat > "$ROOT/app/src/main/AndroidManifest.xml" <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-            <application android:allowBackup="true" android:icon="@drawable/ic_launcher" android:label="Business Tycoon" android:theme="@style/AppTheme" android:usesCleartextTraffic="false">
-              <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="portrait">
+            <application
+                android:allowBackup="true"
+                android:icon="@drawable/ic_launcher"
+                android:label="Business Tycoon"
+                android:theme="@style/AppTheme"
+                android:usesCleartextTraffic="false">
+              <activity
+                  android:name=".MainActivity"
+                  android:exported="true"
+                  android:screenOrientation="portrait">
                 <intent-filter>
                   <action android:name="android.intent.action.MAIN" />
                   <category android:name="android.intent.category.LAUNCHER" />
@@ -86,9 +94,11 @@ jobs:
             <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
               <item name="android:fontFamily">sans</item>
               <item name="android:windowLightStatusBar">false</item>
+              <item name="android:windowLightNavigationBar">false</item>
               <item name="android:statusBarColor">#0B132B</item>
               <item name="android:navigationBarColor">#070B14</item>
               <item name="android:windowBackground">#0B132B</item>
+              <item name="android:colorAccent">#00E676</item>
             </style>
           </resources>
           EOF
@@ -103,9 +113,12 @@ jobs:
 
           cat > "$ROOT/app/src/main/java/com/aurelius/businesstycoon/MainActivity.java" <<'EOF'
           package com.aurelius.businesstycoon;
+
           import android.app.Activity;
+          import android.graphics.Color;
           import android.os.Bundle;
           import android.view.View;
+          import android.view.Window;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
@@ -113,53 +126,63 @@ jobs:
 
           public class MainActivity extends Activity {
             private WebView webView;
-            @Override public void onCreate(Bundle state) {
+
+            @Override
+            public void onCreate(Bundle state) {
               super.onCreate(state);
-              getWindow().setStatusBarColor(android.graphics.Color.rgb(11,19,43));
-              getWindow().setNavigationBarColor(android.graphics.Color.rgb(7,11,20));
+
+              Window window = getWindow();
+              window.setStatusBarColor(Color.rgb(11, 19, 43));
+              window.setNavigationBarColor(Color.rgb(7, 11, 20));
+              window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+
               webView = new WebView(this);
-              webView.setBackgroundColor(android.graphics.Color.rgb(11,19,43));
+              webView.setBackgroundColor(Color.rgb(11, 19, 43));
               webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-              WebSettings s = webView.getSettings();
-              s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true); s.setDatabaseEnabled(true);
-              s.setAllowFileAccess(true); s.setBuiltInZoomControls(false); s.setDisplayZoomControls(false);
-              webView.setWebViewClient(new WebViewClient()); webView.setWebChromeClient(new WebChromeClient());
-              webView.loadUrl("file:///android_asset/index.html"); setContentView(webView);
+              webView.setVerticalScrollBarEnabled(false);
+              webView.setHorizontalScrollBarEnabled(false);
+
+              WebSettings settings = webView.getSettings();
+              settings.setJavaScriptEnabled(true);
+              settings.setDomStorageEnabled(true);
+              settings.setDatabaseEnabled(true);
+              settings.setAllowFileAccess(true);
+              settings.setBuiltInZoomControls(false);
+              settings.setDisplayZoomControls(false);
+              settings.setTextZoom(100);
+
+              webView.setWebViewClient(new WebViewClient());
+              webView.setWebChromeClient(new WebChromeClient());
+              webView.loadUrl("file:///android_asset/index.html");
+              setContentView(webView);
             }
-            @Override public void onBackPressed() { if (webView != null && webView.canGoBack()) webView.goBack(); else super.onBackPressed(); }
-            @Override protected void onDestroy() { if (webView != null) webView.destroy(); super.onDestroy(); }
+
+            @Override
+            public void onBackPressed() {
+              if (webView != null && webView.canGoBack()) webView.goBack();
+              else super.onBackPressed();
+            }
+
+            @Override
+            protected void onDestroy() {
+              if (webView != null) webView.destroy();
+              super.onDestroy();
+            }
           }
           EOF
 
-          cat > "$ROOT/app/src/main/assets/index.html" <<'EOF'
-          <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Business Tycoon</title>
-          <style>
-          :root{--navy:#0B132B;--bg:#070b14;--card:#111827;--line:#253047;--muted:#7f8ba3;--green:#00E676;--red:#fb7185;--violet:#a78bfa}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;font-family:Inter,system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 90% 0,rgba(0,230,118,.08),transparent 28%),linear-gradient(#0B132B,#070b14 65%);color:#f8fafc;min-height:100vh}.app{max-width:480px;margin:auto;min-height:100vh;padding-bottom:92px}.top{position:sticky;top:0;z-index:8;background:rgba(11,19,43,.96);backdrop-filter:blur(14px);border-bottom:1px solid #1e293b;padding:14px 14px 12px}.brand{display:flex;align-items:center;gap:10px;user-select:none}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#69f0ae,var(--green));display:grid;place-items:center;color:#06130c;font-weight:900}.brand h1{font-size:14px;margin:0}.sub{font-size:10px;color:var(--muted);margin-top:3px}.live{margin-left:auto;border:1px solid rgba(0,230,118,.2);color:var(--green);padding:5px 9px;border-radius:999px;font-size:9px;font-weight:800}.resources{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}.res{background:rgba(17,24,39,.82);border:1px solid #1f2937;border-radius:12px;padding:8px 5px;text-align:center}.res b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.res.green b{color:var(--green)}.res span{font-size:8px;color:#667085;text-transform:uppercase}.content{padding:14px}.flow{display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(0,230,118,.12);background:rgba(0,230,118,.045);padding:12px;border-radius:16px;margin-bottom:16px}.flow small,.eyebrow{font-size:9px;color:#758198;text-transform:uppercase;letter-spacing:1.5px}.flow strong{display:block;color:var(--green);margin-top:4px}.pill{font-size:9px;border:1px solid #334155;border-radius:999px;padding:6px 9px;color:#cbd5e1}.section{margin-bottom:18px}.section h2{font-size:18px;margin:4px 0 10px}.card{background:linear-gradient(180deg,rgba(20,29,50,.96),rgba(13,20,37,.96));border:1px solid rgba(148,163,184,.12);border-radius:20px;padding:14px;box-shadow:0 18px 50px rgba(0,0,0,.22);margin-bottom:10px}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:rgba(2,6,23,.35);border:1px solid #1f2937;border-radius:14px;padding:11px}.metric span{font-size:9px;color:#667085;text-transform:uppercase}.metric b{display:block;margin-top:7px;font-size:14px}.green{color:var(--green)}.row{display:flex;align-items:center;gap:10px}.grow{flex:1;min-width:0}.row h3{font-size:13px;margin:0}.row p{font-size:10px;color:var(--muted);margin:4px 0 0}.icon{width:40px;height:40px;border-radius:13px;background:#1e293b;display:grid;place-items:center;font-size:18px}.btn{border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:11px}.btn.primary{background:var(--green);color:#06130c}.btn.dark{background:#f8fafc;color:#0f172a}.btn.outline{background:#111827;border:1px solid #334155;color:#f8fafc}.btn:disabled{opacity:.45}.wide{width:100%;margin-top:10px}.statement{display:flex;justify-content:space-between;padding:8px 0;font-size:11px;border-bottom:1px solid rgba(51,65,85,.45)}.statement:last-child{border:0}.territory .code{width:42px;height:42px;border-radius:14px;background:#1e293b;display:grid;place-items:center;font-weight:900}.territory.unlocked .code{background:rgba(0,230,118,.1);color:var(--green)}.market-top{display:flex;justify-content:space-between;align-items:center}.price{font-size:16px;font-weight:900}.change{font-size:10px;font-weight:800}.change.up{color:var(--green)}.change.down{color:var(--red)}.inventory{display:flex;justify-content:space-between;background:rgba(2,6,23,.35);padding:8px 10px;border-radius:10px;margin-top:10px;font-size:10px;color:var(--muted)}.actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:grid;grid-template-columns:repeat(3,1fr);background:rgba(7,11,20,.97);border-top:1px solid #1f2937;padding:7px 8px max(9px,env(safe-area-inset-bottom));z-index:9}.nav button{border:0;background:transparent;color:#667085;padding:9px 4px;border-radius:13px;font-size:10px;font-weight:800}.nav button.active{background:rgba(0,230,118,.08);color:var(--green)}.modal{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:20;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(7px)}.modal.show{display:flex}.sheet{width:100%;max-width:480px;max-height:93vh;overflow:auto;background:#0a1020;border:1px solid #334155;border-radius:28px 28px 0 0;padding:18px}.sheethead{display:flex;align-items:center;gap:10px}.sheethead h2{margin:0;font-size:18px}.close{margin-left:auto;background:#1e293b;border:0;color:white;width:38px;height:38px;border-radius:11px}.inject{display:flex;gap:7px;margin-top:9px}.inject input{min-width:0;flex:1;background:#020617;border:1px solid #334155;color:white;border-radius:11px;padding:10px}.danger{background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.18);color:#fda4af}.boom{background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.18);color:#6ee7b7}.toggle{display:flex;align-items:center;justify-content:space-between}.switch{width:48px;height:27px;border-radius:999px;background:#334155;position:relative}.switch.on{background:var(--green)}.switch:after{content:'';width:19px;height:19px;background:white;border-radius:50%;position:absolute;top:4px;left:4px;transition:.2s}.switch.on:after{left:25px}.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#020617;border:1px solid #334155;padding:9px 13px;border-radius:11px;font-size:11px;z-index:30;display:none;white-space:nowrap}.toast.show{display:block}
-          </style></head><body><div class="app"><header class="top"><div class="brand" id="brand"><div class="logo">BT</div><div><h1 id="companyName">Aurelius Capital</h1><div class="sub"><span id="rank">Rising Mogul</span> · Level <span id="level">7</span></div></div><div class="live">LIVE</div></div><div class="resources"><div class="res green"><b id="cash"></b><span>Cash</span></div><div class="res green"><b id="worth"></b><span>Net Worth</span></div><div class="res"><b id="coins"></b><span>Gold</span></div><div class="res"><b id="diamonds"></b><span>Diamonds</span></div></div></header><main class="content"><div class="flow"><div><small>Passive Cash Flow</small><strong id="flow"></strong></div><div class="pill" id="cycleLabel">5 sec cycle</div></div><div id="view"></div></main><nav class="nav"><button data-tab="company" class="active">🏢<br>Company</button><button data-tab="world">🌍<br>World Map</button><button data-tab="market">📈<br>Market</button></nav></div><div class="modal" id="admin"><div class="sheet"><div class="sheethead"><div class="icon">🔐</div><div><div class="eyebrow" style="color:#c4b5fd">God Mode</div><h2>Developer Admin Suite</h2></div><button class="close" onclick="closeAdmin()">✕</button></div><div class="card" style="margin-top:15px"><b>Resource Injection</b><div class="inject"><input id="cashIn" type="number" placeholder="Add Cash"><button class="btn" style="background:#8b5cf6;color:white" onclick="inject('cash','cashIn')">Inject</button></div><div class="inject"><input id="coinIn" type="number" placeholder="Add Gold Coins"><button class="btn" style="background:#8b5cf6;color:white" onclick="inject('goldCoins','coinIn')">Inject</button></div><div class="inject"><input id="diaIn" type="number" placeholder="Add Diamonds"><button class="btn" style="background:#8b5cf6;color:white" onclick="inject('diamonds','diaIn')">Inject</button></div></div><div class="card toggle"><div><b>Instant Completion Engine</b><p style="font-size:10px;color:#7f8ba3;margin:4px 0 0">Rapid passive-income execution</p></div><div id="switch" class="switch" onclick="toggleInstant()"></div></div><button class="btn wide danger" onclick="marketFactor(.4,'Global market crash executed')">Force Global Market Crash (-60%)</button><button class="btn wide boom" onclick="marketFactor(2.2,'Commodity boom executed')">Force Commodity Boom (+120%)</button><button class="btn wide" style="background:linear-gradient(90deg,#8b5cf6,#d946ef);color:white" onclick="maximize()">👑 Maximize All Levels</button><button class="btn wide outline" onclick="closeAdmin()">Close Admin Suite</button></div></div><div class="toast" id="toast"></div>
-          <script>
-          const INITIAL={companyName:'Aurelius Capital',rank:'Rising Mogul',level:7,cash:185250,goldCoins:420,diamonds:28,efficiency:3,baseIncome:125,totalEarned:428700,staff:{Analyst:2,Manager:1,Director:0},territories:['Home Market'],inventory:{Wheat:0,'Crude Oil':0,Silver:0,Gold:0},instant:false,market:{Wheat:{p:6.4,base:6.4,v:.035},'Crude Oil':{p:82.5,base:82.5,v:.03},Silver:{p:28.75,base:28.75,v:.025},Gold:{p:2345.1,base:2345.1,v:.018}}};
-          const STAFF=[['Analyst',12000,55,'Market intelligence'],['Manager',35000,160,'Operational leverage'],['Director',98000,480,'Executive growth']];
-          const TERR=[['USA',250000,1.45,'US','Deep capital markets'],['Germany',475000,1.70,'DE','Industrial powerhouse'],['Canada',720000,1.95,'CA','Stable expansion'],['Singapore',1200000,2.25,'SG','Global finance hub'],['Japan',2200000,2.65,'JP','Premium enterprise market']];
-          let g;try{g=Object.assign({},INITIAL,JSON.parse(localStorage.getItem('bt-mobile')||'{}'));g.staff=Object.assign({},INITIAL.staff,g.staff);g.inventory=Object.assign({},INITIAL.inventory,g.inventory);g.market=Object.assign({},INITIAL.market,g.market)}catch(e){g=JSON.parse(JSON.stringify(INITIAL))}let tab='company',passiveTimer=null,pressTimer=null;
-          const money=(n,c=false)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',notation:c?'compact':'standard',maximumFractionDigits:c?1:(Math.abs(n)<100?2:0)}).format(Number(n)||0);const num=n=>new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(Number(n)||0);const staffIncome=()=>STAFF.reduce((s,x)=>s+(g.staff[x[0]]||0)*x[2],0);const territoryMult=()=>TERR.reduce((m,t)=>g.territories.includes(t[0])?m*t[2]:m,1);const passive=()=>(g.baseIncome+staffIncome())*(1+g.efficiency*.18)*territoryMult();const inventoryValue=()=>Object.keys(g.inventory).reduce((s,k)=>s+g.inventory[k]*(g.market[k]?.p||0),0);const assetValue=()=>STAFF.reduce((s,x)=>s+(g.staff[x[0]]||0)*x[1]*.75,0)+TERR.reduce((s,t)=>s+(g.territories.includes(t[0])?t[1]:0),0)+g.efficiency*25000;const worth=()=>g.cash+inventoryValue()+assetValue();function save(){localStorage.setItem('bt-mobile',JSON.stringify(g))}function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800)}
-          function header(){companyName.textContent=g.companyName;rank.textContent=g.rank;level.textContent=g.level;cash.textContent=money(g.cash,true);worth.textContent=money(worth(),true);coins.textContent=num(g.goldCoins);diamonds.textContent=num(g.diamonds);flow.textContent='+'+money(passive())+' / cycle';cycleLabel.textContent=g.instant?'Instant Engine':'5 sec cycle';document.getElementById('switch').classList.toggle('on',g.instant)}
-          function metric(l,v,green=false){return `<div class="metric"><span>${l}</span><b class="${green?'green':''}">${v}</b></div>`}function company(){const op=(g.staff.Analyst*18+g.staff.Manager*52+g.staff.Director*145)*5;const upgrade=55000*Math.pow(1.7,g.efficiency-1);return `<section class="section"><div class="eyebrow">Executive Dashboard</div><h2>Company Overview</h2><div class="card"><div class="metrics">${metric('Revenue / Cycle',money(passive()),true)}${metric('Global Multiplier',territoryMult().toFixed(2)+'×')}${metric('Market Inventory',money(inventoryValue()))}${metric('Corporate Net Worth',money(worth()),true)}</div></div></section><section class="section"><div class="eyebrow">Operations</div><h2>Efficiency Core</h2><div class="card"><div class="row"><div class="icon">⚡</div><div class="grow"><h3>Baseline Operational Efficiency · L${g.efficiency}</h3><p>Each level adds 18% to passive income.</p></div></div><button class="btn wide primary" onclick="upgrade()">Upgrade Efficiency · ${money(upgrade)}</button></div></section><section class="section"><div class="eyebrow">People</div><h2>Core Staff</h2>${STAFF.map(x=>`<div class="card row"><div class="icon">👤</div><div class="grow"><h3>${x[0]} · ${g.staff[x[0]]||0}</h3><p>${x[3]} · +${money(x[2])}/cycle</p></div><button class="btn dark" onclick="hire('${x[0]}')">Hire ${money(x[1],true)}</button></div>`).join('')}</section><section class="section"><div class="eyebrow">Finance</div><h2>Financial Statement</h2><div class="card"><div class="statement"><span>Gross operating income</span><b class="green">${money(passive())}</b></div><div class="statement"><span>Estimated operating cost</span><b style="color:var(--red)">-${money(op)}</b></div><div class="statement"><span>Net operating cash flow</span><b class="green">${money(passive()-op)}</b></div><div class="statement"><span>Lifetime earnings</span><b class="green">${money(g.totalEarned)}</b></div><div class="statement"><span>Liquid cash</span><b class="green">${money(g.cash)}</b></div></div></section>`}
-          function world(){return `<section class="section"><div class="eyebrow">Global Expansion</div><h2>World Map</h2><div class="card"><div style="height:120px;border-radius:15px;border:1px solid #1f2937;background:radial-gradient(circle at 25% 45%,rgba(0,230,118,.16),transparent 20%),radial-gradient(circle at 70% 35%,rgba(96,165,250,.14),transparent 25%),linear-gradient(145deg,#121d35,#0a1020);display:flex;align-items:flex-end;padding:13px"><div><b>${g.territories.length-1} territories live</b><p style="font-size:10px;color:#7f8ba3;margin:4px 0 0">High-value markets compound globally.</p></div></div></div></section><section class="section"><div class="eyebrow">Territory Pipeline</div><h2>Expansion Opportunities</h2>${TERR.map(t=>{const u=g.territories.includes(t[0]);return `<div class="card territory ${u?'unlocked':''}"><div class="row"><div class="code">${t[3]}</div><div class="grow"><h3>${t[0]} ${u?'✓':''}</h3><p>${t[4]}</p></div><b class="green">${t[2].toFixed(2)}×</b></div><button class="btn wide ${u?'outline':'dark'}" ${u?'disabled':''} onclick="unlock('${t[0]}')">${u?'Territory Unlocked':'Unlock for '+money(t[1])}</button></div>`}).join('')}</section>`}
-          function market(){return `<section class="section"><div class="eyebrow">Live Exchange</div><h2>Stock Market</h2><div class="card"><small style="color:#7f8ba3">Trading Cash</small><div class="green" style="font-size:21px;font-weight:900;margin-top:4px">${money(g.cash)}</div></div></section>${Object.keys(g.market).map(k=>{const m=g.market[k],prev=m.prev||m.p,ch=prev?((m.p-prev)/prev*100):0,up=ch>=0;return `<div class="card"><div class="market-top"><div><b>${k}</b><p style="font-size:9px;color:#667085;margin:3px 0">${k==='Crude Oil'?'OIL':k.slice(0,3).toUpperCase()}</p></div><div style="text-align:right"><div class="price">${money(m.p)}</div><div class="change ${up?'up':'down'}">${up?'▲':'▼'} ${Math.abs(ch).toFixed(2)}%</div></div></div><div class="inventory"><span>Inventory</span><b>${g.inventory[k]} units</b></div><div class="actions"><button class="btn primary" onclick="trade('${k}','buy')">BUY</button><button class="btn outline" onclick="trade('${k}','sell')">SELL</button></div></div>`}).join('')}`}
-          function render(){header();view.innerHTML=tab==='company'?company():tab==='world'?world():market();save()}function hire(n){const x=STAFF.find(a=>a[0]===n);if(g.cash<x[1])return toast('Insufficient cash');g.cash-=x[1];g.staff[n]++;render()}function upgrade(){const c=55000*Math.pow(1.7,g.efficiency-1);if(g.cash<c)return toast('Insufficient cash for upgrade');g.cash-=c;g.efficiency++;g.level++;render()}function unlock(n){const t=TERR.find(x=>x[0]===n);if(g.territories.includes(n))return;if(g.cash<t[1])return toast('Expansion capital is too low');g.cash-=t[1];g.territories.push(n);g.level++;render()}function trade(k,s){const p=g.market[k].p;if(s==='buy'){if(g.cash<p)return toast('Insufficient cash');g.cash-=p;g.inventory[k]++}else{if(g.inventory[k]<1)return toast('No inventory to sell');g.inventory[k]--;g.cash+=p}render()}function marketTick(){Object.keys(g.market).forEach(k=>{const m=g.market[k],shock=(Math.random()-.5)*2*m.v,mean=((m.base-m.p)/m.base)*.006,drift=k==='Gold'?.0003:.00015;m.prev=m.p;m.p=Math.max(m.base*.22,m.p*(1+drift+shock+mean))});render()}function restartPassive(){clearInterval(passiveTimer);passiveTimer=setInterval(()=>{const e=passive();g.cash+=e;g.totalEarned+=e;render()},g.instant?100:5000)}function toggleInstant(){g.instant=!g.instant;restartPassive();render()}function inject(f,id){const v=Number(document.getElementById(id).value);if(!Number.isFinite(v)||v<=0)return toast('Enter a positive amount');g[f]+=v;document.getElementById(id).value='';render();toast('Resource injected')}function marketFactor(f,msg){Object.keys(g.market).forEach(k=>{g.market[k].prev=g.market[k].p;g.market[k].p=Math.max(.01,g.market[k].p*f)});render();toast(msg)}function maximize(){g.level=100;g.rank='Global Tycoon';g.efficiency=25;g.staff={Analyst:25,Manager:25,Director:25};g.territories=['Home Market',...TERR.map(x=>x[0])];render();toast('All levels maximized')}function closeAdmin(){admin.classList.remove('show')}document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===b));render()});brand.onpointerdown=()=>{clearTimeout(pressTimer);pressTimer=setTimeout(()=>{admin.classList.add('show');navigator.vibrate&&navigator.vibrate(40)},3000)};['onpointerup','onpointercancel','onpointerleave'].forEach(k=>brand[k]=()=>clearTimeout(pressTimer));setInterval(marketTick,5000);restartPassive();render();
-          </script></body></html>
-          EOF
+          cp "$GITHUB_WORKSPACE/business-tycoon-v2/index.html" "$ROOT/app/src/main/assets/index.html"
 
       - name: Build APK
         working-directory: business-tycoon-build
         run: gradle --no-daemon :app:assembleDebug
 
       - name: Rename APK
-        run: cp business-tycoon-build/app/build/outputs/apk/debug/app-debug.apk Business-Tycoon-v1.0.0.apk
+        run: cp business-tycoon-build/app/build/outputs/apk/debug/app-debug.apk Business-Tycoon-v2.0.0.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Business-Tycoon-Android-APK
-          path: Business-Tycoon-v1.0.0.apk
+          name: Business-Tycoon-v2-Android-APK
+          path: Business-Tycoon-v2.0.0.apk
           if-no-files-found: error
