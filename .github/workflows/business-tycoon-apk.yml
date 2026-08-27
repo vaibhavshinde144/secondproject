@@ -48,6 +48,12 @@ jobs:
           }
           EOF
 
+          cat > "$ROOT/gradle.properties" <<'EOF'
+          android.useAndroidX=true
+          android.nonTransitiveRClass=true
+          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+          EOF
+
           cat > "$ROOT/app/build.gradle" <<'EOF'
           plugins { id 'com.android.application' }
           android {
@@ -57,13 +63,16 @@ jobs:
                   applicationId 'com.aurelius.businesstycoon'
                   minSdk 24
                   targetSdk 34
-                  versionCode 2
-                  versionName '2.0.0'
+                  versionCode 3
+                  versionName '3.0.0'
               }
               buildTypes {
                   debug { minifyEnabled false }
                   release { minifyEnabled false }
               }
+          }
+          dependencies {
+              implementation 'androidx.work:work-runtime:2.9.1'
           }
           EOF
 
@@ -115,26 +124,34 @@ jobs:
           package com.aurelius.businesstycoon;
 
           import android.app.Activity;
+          import android.content.Context;
+          import android.content.SharedPreferences;
           import android.graphics.Color;
+          import android.os.Build;
           import android.os.Bundle;
           import android.view.View;
           import android.view.Window;
+          import android.webkit.JavascriptInterface;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
 
+          import androidx.work.ExistingPeriodicWorkPolicy;
+          import androidx.work.PeriodicWorkRequest;
+          import androidx.work.WorkManager;
+
+          import java.util.concurrent.TimeUnit;
+
           public class MainActivity extends Activity {
             private WebView webView;
+            private static final String PREFS = "business_tycoon_background";
+            private static final String WORK_NAME = "business_tycoon_economy";
 
             @Override
             public void onCreate(Bundle state) {
               super.onCreate(state);
-
-              Window window = getWindow();
-              window.setStatusBarColor(Color.rgb(11, 19, 43));
-              window.setNavigationBarColor(Color.rgb(7, 11, 20));
-              window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+              setBars(false);
 
               webView = new WebView(this);
               webView.setBackgroundColor(Color.rgb(11, 19, 43));
@@ -151,10 +168,71 @@ jobs:
               settings.setDisplayZoomControls(false);
               settings.setTextZoom(100);
 
+              webView.addJavascriptInterface(new GameBridge(this), "AndroidGame");
               webView.setWebViewClient(new WebViewClient());
               webView.setWebChromeClient(new WebChromeClient());
               webView.loadUrl("file:///android_asset/index.html");
               setContentView(webView);
+              scheduleBackground(60);
+            }
+
+            private void setBars(boolean light) {
+              Window window = getWindow();
+              int flags = View.SYSTEM_UI_FLAG_VISIBLE;
+              if (light && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+              if (light && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+              window.getDecorView().setSystemUiVisibility(flags);
+              window.setStatusBarColor(light ? Color.rgb(248,250,252) : Color.rgb(11,19,43));
+              window.setNavigationBarColor(light ? Color.rgb(248,250,252) : Color.rgb(7,11,20));
+            }
+
+            private void scheduleBackground(int minutes) {
+              long interval = Math.max(15, minutes);
+              PeriodicWorkRequest work = new PeriodicWorkRequest.Builder(BackgroundEconomyWorker.class, interval, TimeUnit.MINUTES)
+                  .addTag(WORK_NAME)
+                  .build();
+              WorkManager.getInstance(this).enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.UPDATE, work);
+            }
+
+            public class GameBridge {
+              private final Context context;
+              GameBridge(Context context) { this.context = context; }
+
+              @JavascriptInterface
+              public void syncBackgroundState(String json) {
+                context.getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString("state", json).apply();
+              }
+
+              @JavascriptInterface
+              public String getBackgroundState() {
+                return context.getSharedPreferences(PREFS, MODE_PRIVATE).getString("state", "");
+              }
+
+              @JavascriptInterface
+              public void scheduleBackground(int minutes) {
+                runOnUiThread(() -> MainActivity.this.scheduleBackground(minutes));
+              }
+
+              @JavascriptInterface
+              public void setSystemBars(String mode) {
+                final boolean light = "light".equalsIgnoreCase(mode);
+                runOnUiThread(() -> {
+                  setBars(light);
+                  if (webView != null) webView.setBackgroundColor(light ? Color.rgb(244,247,251) : Color.rgb(11,19,43));
+                });
+              }
+            }
+
+            @Override
+            protected void onPause() {
+              super.onPause();
+              if (webView != null) webView.evaluateJavascript("try{save();syncNativeState();}catch(e){}", null);
+            }
+
+            @Override
+            protected void onResume() {
+              super.onResume();
+              if (webView != null) webView.evaluateJavascript("try{settleOfflineProgress(true);render();}catch(e){}", null);
             }
 
             @Override
@@ -171,18 +249,167 @@ jobs:
           }
           EOF
 
-          cp "$GITHUB_WORKSPACE/business-tycoon-v2/index.html" "$ROOT/app/src/main/assets/index.html"
+          cat > "$ROOT/app/src/main/java/com/aurelius/businesstycoon/BackgroundEconomyWorker.java" <<'EOF'
+          package com.aurelius.businesstycoon;
+
+          import android.content.Context;
+          import android.content.SharedPreferences;
+
+          import androidx.annotation.NonNull;
+          import androidx.work.Worker;
+          import androidx.work.WorkerParameters;
+
+          import org.json.JSONObject;
+
+          import java.util.Random;
+
+          public class BackgroundEconomyWorker extends Worker {
+            private static final String PREFS = "business_tycoon_background";
+            private static final long CYCLE_MS = 5000L;
+            private static final long RISK_MS = 30L * 60L * 1000L;
+            private final Random random = new Random();
+
+            private static final String[] NAMES = {"Severe Flood","Earthquake","Cyclone","Property Fire","Vehicle Accident","Refinery Fire","Cyberattack","Supply Chain Strike","Personal Medical Emergency"};
+            private static final String[] TYPES = {"Natural","Natural","Natural","Accident","Accident","Man-made","Man-made","Man-made","Personal"};
+            private static final String[] CATEGORIES = {"property","disaster","disaster","property","vehicle","company","company","company","personal"};
+            private static final String[] EMOJIS = {"🌊","🌎","🌀","🏠","🚗","🔥","🛡️","⚠️","🏥"};
+            private static final String[] TEXTS = {
+              "Flooding damaged property and interrupted operations.",
+              "Infrastructure damage caused an unexpected capital loss.",
+              "Weather disruption damaged facilities and logistics.",
+              "A major property fire damaged insured real-estate assets.",
+              "A serious fleet accident generated repair and replacement costs.",
+              "An industrial fire caused an emergency operating loss.",
+              "A cyber incident interrupted digital operations and settlements.",
+              "A labor disruption produced supply-chain losses.",
+              "An unexpected personal emergency required a large cash outflow."
+            };
+            private static final double[] SEV = {.018,.026,.020,.014,.010,.017,.013,.010,.006};
+
+            public BackgroundEconomyWorker(@NonNull Context context, @NonNull WorkerParameters params) {
+              super(context, params);
+            }
+
+            private double coverage(JSONObject coverage, String category, String type) {
+              double specific = coverage.optDouble(category, 0.0);
+              double catastrophe = ("Natural".equals(type) || "Man-made".equals(type)) ? coverage.optDouble("disaster", 0.0) : 0.0;
+              return Math.min(.95, Math.max(specific, catastrophe));
+            }
+
+            @NonNull
+            @Override
+            public Result doWork() {
+              try {
+                SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+                String raw = prefs.getString("state", "");
+                if (raw == null || raw.isEmpty()) return Result.success();
+
+                JSONObject j = new JSONObject(raw);
+                long now = System.currentTimeMillis();
+                long lastEconomyAt = j.optLong("lastEconomyAt", now);
+                long lastCollectionAt = j.optLong("lastCollectionAt", now);
+                long lastRiskAt = j.optLong("lastRiskAt", now);
+
+                double cash = j.optDouble("cash", 0.0);
+                double totalEarned = j.optDouble("totalEarned", 0.0);
+                double taxDue = j.optDouble("taxDue", 0.0);
+                double taxRecovered = j.optDouble("taxRecovered", 0.0);
+                double insurancePaid = j.optDouble("insurancePaidTotal", 0.0);
+                double insuranceClaims = j.optDouble("insuranceClaimsTotal", 0.0);
+                double disasterLoss = j.optDouble("disasterLossTotal", 0.0);
+                double grossPerCycle = Math.max(0.0, j.optDouble("passiveGross", 0.0));
+                double taxRate = Math.max(0.0, j.optDouble("taxRate", .18));
+                double premiumTotal = Math.max(0.0, j.optDouble("premiumTotal", 0.0));
+                double netWorth = Math.max(50000.0, Math.abs(j.optDouble("netWorth", 50000.0)));
+                int intervalMin = j.optInt("collectionIntervalMin", 60);
+                long collectionMs = Math.max(15, intervalMin) * 60L * 1000L;
+
+                long cycles = Math.max(0L, (now - lastEconomyAt) / CYCLE_MS);
+                if (cycles > 0) {
+                  double earnings = grossPerCycle * cycles;
+                  cash += earnings;
+                  totalEarned += earnings;
+                  taxDue += earnings * taxRate;
+                  lastEconomyAt += cycles * CYCLE_MS;
+                  netWorth += earnings;
+                }
+
+                long collections = Math.min(720L, Math.max(0L, (now - lastCollectionAt) / collectionMs));
+                for (long i = 0; i < collections; i++) {
+                  cash -= premiumTotal;
+                  insurancePaid += premiumTotal;
+                  double paid = Math.max(0.0, Math.min(Math.max(0.0, cash), taxDue));
+                  cash -= paid;
+                  taxDue -= paid;
+                  taxRecovered += paid;
+                  if (taxDue > 0.0) taxDue *= 1.05;
+                  lastCollectionAt += collectionMs;
+                }
+
+                JSONObject coverage = j.optJSONObject("coverage");
+                if (coverage == null) coverage = new JSONObject();
+                long riskBlocks = Math.min(4320L, Math.max(0L, (now - lastRiskAt) / RISK_MS));
+                JSONObject lastDisaster = j.optJSONObject("lastDisaster");
+                for (long i = 0; i < riskBlocks; i++) {
+                  if (random.nextDouble() < .12) {
+                    int idx = random.nextInt(NAMES.length);
+                    double grossLoss = Math.min(750000.0, Math.max(1500.0, netWorth * SEV[idx] * (.7 + random.nextDouble() * .7)));
+                    double rate = coverage(coverage, CATEGORIES[idx], TYPES[idx]);
+                    double covered = grossLoss * rate;
+                    double netLoss = grossLoss - covered;
+                    cash -= netLoss;
+                    disasterLoss += netLoss;
+                    insuranceClaims += covered;
+                    netWorth = Math.max(50000.0, netWorth - netLoss);
+                    lastDisaster = new JSONObject();
+                    lastDisaster.put("name", NAMES[idx]);
+                    lastDisaster.put("type", TYPES[idx]);
+                    lastDisaster.put("category", CATEGORIES[idx]);
+                    lastDisaster.put("emoji", EMOJIS[idx]);
+                    lastDisaster.put("text", TEXTS[idx]);
+                    lastDisaster.put("grossLoss", grossLoss);
+                    lastDisaster.put("covered", covered);
+                    lastDisaster.put("netLoss", netLoss);
+                    lastDisaster.put("coverageRate", rate);
+                    lastDisaster.put("at", lastRiskAt + RISK_MS);
+                  }
+                  lastRiskAt += RISK_MS;
+                }
+
+                j.put("cash", cash);
+                j.put("totalEarned", totalEarned);
+                j.put("taxDue", taxDue);
+                j.put("taxRecovered", taxRecovered);
+                j.put("insurancePaidTotal", insurancePaid);
+                j.put("insuranceClaimsTotal", insuranceClaims);
+                j.put("disasterLossTotal", disasterLoss);
+                j.put("lastEconomyAt", lastEconomyAt);
+                j.put("lastCollectionAt", lastCollectionAt);
+                j.put("lastRiskAt", lastRiskAt);
+                j.put("netWorth", netWorth);
+                if (lastDisaster != null) j.put("lastDisaster", lastDisaster);
+                j.put("updatedAt", now);
+                prefs.edit().putString("state", j.toString()).apply();
+                return Result.success();
+              } catch (Exception e) {
+                return Result.retry();
+              }
+            }
+          }
+          EOF
+
+          cp "$GITHUB_WORKSPACE/business-tycoon-v3/index.html" "$ROOT/app/src/main/assets/index.html"
 
       - name: Build APK
         working-directory: business-tycoon-build
         run: gradle --no-daemon :app:assembleDebug
 
       - name: Rename APK
-        run: cp business-tycoon-build/app/build/outputs/apk/debug/app-debug.apk Business-Tycoon-v2.0.0.apk
+        run: cp business-tycoon-build/app/build/outputs/apk/debug/app-debug.apk Business-Tycoon-v3.0.0.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Business-Tycoon-v2-Android-APK
-          path: Business-Tycoon-v2.0.0.apk
+          name: Business-Tycoon-v3-Android-APK
+          path: Business-Tycoon-v3.0.0.apk
           if-no-files-found: error
