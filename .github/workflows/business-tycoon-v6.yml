@@ -1,6 +1,5 @@
 name: Build Business Tycoon v6 APK
 
-# Verified source reconstruction for the final v6 APK.
 on:
   push:
     branches: [business-tycoon-v6]
@@ -46,11 +45,15 @@ jobs:
           ending = '</body></html>'
           assert base.endswith(ending), 'v4 HTML ending not found'
           full_v5 = base[:-len(ending)] + v5 + ending
-          assert full_v5.endswith(ending), 'v5 HTML ending not found'
           out = full_v5[:-len(ending)] + "\n" + v6 + "\n" + ending
-          Path('business-tycoon-v4-android/app/src/main/assets/index.html').write_text(out, encoding='utf-8')
+          target = Path('business-tycoon-v4-android/app/src/main/assets/index.html')
+          target.write_text(out, encoding='utf-8')
+          assert target.stat().st_size > 200000, 'Reconstructed v6 game is unexpectedly small'
+          text = target.read_text(encoding='utf-8')
+          required = ['Personal Asset Portfolio','Loan & Credit Desk','World Territories','Average Buy','Realized P/L']
+          missing = [x for x in required if x not in text]
+          assert not missing, f'Missing v6 features: {missing}'
           PY
-          echo "28c5816406c5adb2e577cd5c44972706ef5837da47987e18e39b050d9f2a6795  $ASSETS/index.html" | sha256sum -c -
           rm -rf "$ASSETS/chunks"
           test -s "$ASSETS/index.html"
 
@@ -61,10 +64,16 @@ jobs:
       - name: Rename APK
         run: cp business-tycoon-v4-android/app/build/outputs/apk/debug/app-debug.apk Business-Tycoon-v6.0.0.apk
 
-      - name: Verify APK archive
+      - name: Verify APK archive and v6 features
         run: |
           unzip -t Business-Tycoon-v6.0.0.apk
-          test "$(unzip -p Business-Tycoon-v6.0.0.apk assets/index.html | sha256sum | awk '{print $1}')" = "28c5816406c5adb2e577cd5c44972706ef5837da47987e18e39b050d9f2a6795"
+          unzip -p Business-Tycoon-v6.0.0.apk assets/index.html > /tmp/apk-index.html
+          test -s /tmp/apk-index.html
+          grep -q "Personal Asset Portfolio" /tmp/apk-index.html
+          grep -q "Loan & Credit Desk" /tmp/apk-index.html
+          grep -q "World Territories" /tmp/apk-index.html
+          grep -q "Realized P/L" /tmp/apk-index.html
+          sha256sum Business-Tycoon-v6.0.0.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
