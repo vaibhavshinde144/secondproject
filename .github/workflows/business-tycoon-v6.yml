@@ -1,6 +1,6 @@
 name: Build Business Tycoon v6 APK
 
-# Complete v6 source is uploaded; this revision starts the final verified build.
+# Verified source reconstruction for the final v6 APK.
 on:
   push:
     branches: [business-tycoon-v6]
@@ -30,7 +30,13 @@ jobs:
           ASSETS="$GITHUB_WORKSPACE/business-tycoon-v4-android/app/src/main/assets"
           cat "$ASSETS"/chunks/part*.b64 | base64 -d | gzip -d > /tmp/v4-base.html
           cat "$GITHUB_WORKSPACE"/business-tycoon-v5/extra/part*.b64 | base64 -d | gzip -d > /tmp/v5-extra.html
-          cat "$GITHUB_WORKSPACE"/business-tycoon-v6/extra/part*.b64 | base64 -d | gzip -d > /tmp/v6-extra.html
+          cat \
+            "$GITHUB_WORKSPACE"/business-tycoon-v6/extra/part01.b64 \
+            "$GITHUB_WORKSPACE"/business-tycoon-v6/extra/part02a.b64 \
+            "$GITHUB_WORKSPACE"/business-tycoon-v6/extra/part02b.b64 \
+            "$GITHUB_WORKSPACE"/business-tycoon-v6/extra/part03.b64 \
+            "$GITHUB_WORKSPACE"/business-tycoon-v6/extra/part04.b64 \
+            | base64 -d | gzip -d > /tmp/v6-extra.html
           echo "115210d84ac380a483dc2e713704c1d260655db6161e3258c995065790cca407  /tmp/v6-extra.html" | sha256sum -c -
           python3 - <<'PY'
           from pathlib import Path
