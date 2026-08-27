@@ -50,7 +50,7 @@ jobs:
           target.write_text(out, encoding='utf-8')
           assert target.stat().st_size > 200000, 'Reconstructed v6 game is unexpectedly small'
           text = target.read_text(encoding='utf-8')
-          required = ['Personal Asset Portfolio','Loan & Credit Desk','World Territories','Average Buy','Realized P/L']
+          required = ['Personal-Use Portfolio','Loans & Credit','World Territories','Average Buy','Realized P/L']
           missing = [x for x in required if x not in text]
           assert not missing, f'Missing v6 features: {missing}'
           PY
@@ -69,9 +69,10 @@ jobs:
           unzip -t Business-Tycoon-v6.0.0.apk
           unzip -p Business-Tycoon-v6.0.0.apk assets/index.html > /tmp/apk-index.html
           test -s /tmp/apk-index.html
-          grep -q "Personal Asset Portfolio" /tmp/apk-index.html
-          grep -q "Loan & Credit Desk" /tmp/apk-index.html
+          grep -q "Personal-Use Portfolio" /tmp/apk-index.html
+          grep -q "Loans & Credit" /tmp/apk-index.html
           grep -q "World Territories" /tmp/apk-index.html
+          grep -q "Average Buy" /tmp/apk-index.html
           grep -q "Realized P/L" /tmp/apk-index.html
           sha256sum Business-Tycoon-v6.0.0.apk
 
