@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0B132B">
+<title>Business Tycoon</title>
+<style>
+:root{
+  --navy:#0B132B;--bg:#060a13;--bg2:#09101d;--card:#111827;--card2:#0c1424;
+  --line:#253047;--line2:#1d2739;--muted:#7e8aa3;--muted2:#526079;--green:#00E676;
+  --red:#fb7185;--amber:#fbbf24;--blue:#60a5fa;--violet:#a78bfa;--white:#f8fafc;
+  --navh:78px
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--white);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:radial-gradient(circle at 90% 0,rgba(0,230,118,.075),transparent 26%),radial-gradient(circle at 5% 20%,rgba(96,165,250,.05),transparent 25%),linear-gradient(180deg,var(--navy),#08101d 32%,var(--bg) 78%)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:calc(var(--navh) + 30px)}
+.top{
+  position:sticky;top:0;z-index:15;background:rgba(11,19,43,.97);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(51,65,85,.6);padding:16px 16px 14px
+}
+.brand{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:11px;user-select:none;touch-action:manipulation}
+.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#6ff2b2,#00E676);display:grid;place-items:center;color:#04120b;font-weight:950;font-size:17px;box-shadow:0 0 28px rgba(0,230,118,.14)}
+.brand-copy{min-width:0}
+.brand h1{font-size:15px;line-height:1.2;margin:0;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:10px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live{border:1px solid rgba(0,230,118,.22);background:rgba(0,230,118,.05);color:var(--green);padding:6px 9px;border-radius:999px;font-size:9px;font-weight:900;letter-spacing:.6px}
+.resources{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:13px}
+.res{min-width:0;background:rgba(17,24,39,.78);border:1px solid rgba(51,65,85,.62);border-radius:14px;padding:9px 5px;text-align:center}
+.res b{display:block;font-size:11px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res.positive b{color:var(--green)}
+.res.negative b{color:var(--red)}
+.res span{display:block;margin-top:4px;font-size:8px;color:#667085;text-transform:uppercase;letter-spacing:.45px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.content{padding:16px}
+.flow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;border:1px solid rgba(0,230,118,.13);background:linear-gradient(110deg,rgba(0,230,118,.06),rgba(0,230,118,.018));padding:14px 15px;border-radius:20px;margin-bottom:20px;box-shadow:inset 0 0 30px rgba(0,230,118,.015)}
+.flow small,.eyebrow{font-size:9px;color:#7f8da6;text-transform:uppercase;letter-spacing:1.7px;font-weight:650}
+.flow strong{display:block;color:var(--green);margin-top:5px;font-size:19px;line-height:1.1}
+.pill{font-size:9px;border:1px solid #334155;border-radius:999px;padding:7px 9px;color:#cbd5e1;white-space:nowrap}
+.section{margin-bottom:21px}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-bottom:10px}
+.section h2{font-size:19px;line-height:1.2;margin:4px 0 0;font-weight:900;letter-spacing:-.25px}
+.section-action{font-size:10px;color:var(--green);background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.13);padding:6px 9px;border-radius:10px}
+.card{background:linear-gradient(180deg,rgba(20,29,50,.96),rgba(12,20,36,.96));border:1px solid rgba(79,93,119,.28);border-radius:21px;padding:14px;box-shadow:0 16px 48px rgba(0,0,0,.2);margin-bottom:10px;overflow:hidden}
+.card.soft{background:linear-gradient(180deg,rgba(15,23,42,.8),rgba(9,15,27,.86))}
+.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.metric{min-width:0;background:rgba(2,6,23,.34);border:1px solid rgba(51,65,85,.58);border-radius:16px;padding:12px}
+.metric span{font-size:9px;color:#6f7b91;text-transform:uppercase;letter-spacing:.5px}
+.metric b{display:block;margin-top:8px;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.green{color:var(--green)!important}.red{color:var(--red)!important}.amber{color:var(--amber)!important}
+.row{display:flex;align-items:center;gap:11px;min-width:0}
+.grow{flex:1;min-width:0}
+.row h3{font-size:13px;margin:0;font-weight:800}
+.row p{font-size:10px;line-height:1.45;color:var(--muted);margin:4px 0 0}
+.icon{width:42px;height:42px;flex:0 0 42px;border-radius:14px;background:#1b2941;display:grid;place-items:center;font-size:19px}
+.icon.greenbg{background:rgba(0,230,118,.09)}
+.btn{border:0;border-radius:12px;padding:10px 12px;font-weight:900;font-size:10px;line-height:1.15;transition:transform .08s ease,opacity .2s ease;white-space:nowrap}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--green);color:#05120b}
+.btn.dark{background:#f8fafc;color:#0f172a}
+.btn.outline{background:#111827;border:1px solid #334155;color:#f8fafc}
+.btn.ghost{background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.12);color:#cbd5e1}
+.btn.danger{background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.2);color:#fda4af}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.wide{width:100%;margin-top:11px}
+.statement{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:10.5px;border-bottom:1px solid rgba(51,65,85,.42)}
+.statement:last-child{border-bottom:0}.statement span{color:#8895aa}.statement b{text-align:right}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{border:1px solid #2d3a51;background:#0f172a;color:#8f9cb1;border-radius:999px;padding:8px 11px;font-size:9px;font-weight:800;white-space:nowrap}
+.chip.active{background:rgba(0,230,118,.09);border-color:rgba(0,230,118,.23);color:var(--green)}
+.hero-map{height:122px;border-radius:16px;border:1px solid #1f2937;background:radial-gradient(circle at 25% 45%,rgba(0,230,118,.16),transparent 20%),radial-gradient(circle at 70% 35%,rgba(96,165,250,.14),transparent 25%),linear-gradient(145deg,#121d35,#0a1020);position:relative;overflow:hidden;padding:13px;display:flex;align-items:flex-end}
+.hero-map:before{content:"";position:absolute;inset:0;opacity:.25;background-image:linear-gradient(rgba(148,163,184,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.09) 1px,transparent 1px);background-size:22px 22px}
+.hero-map>div{position:relative}
+.territory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.territory{min-width:0}.territory .code{width:38px;height:38px;border-radius:12px;background:#1e293b;display:grid;place-items:center;font-weight:950;font-size:11px}
+.territory.unlocked .code{background:rgba(0,230,118,.10);color:var(--green)}
+.territory h3{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.asset-card .asset-top{display:flex;gap:10px;align-items:flex-start}
+.asset-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:11px}
+.mini{background:rgba(2,6,23,.3);border:1px solid rgba(51,65,85,.45);border-radius:11px;padding:8px;min-width:0}
+.mini span{display:block;font-size:7.5px;color:#68758c;text-transform:uppercase}.mini b{display:block;margin-top:5px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.action-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}.action-row.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.action-row .btn{padding:10px 5px;overflow:hidden;text-overflow:ellipsis}
+.badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}.badge{font-size:8px;padding:5px 7px;border-radius:999px;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.16);color:#93c5fd}
+.badge.good{background:rgba(0,230,118,.07);border-color:rgba(0,230,118,.16);color:#6ee7b7}
+.progress{height:6px;border-radius:999px;background:#111827;overflow:hidden;margin-top:9px}.progress i{display:block;height:100%;background:linear-gradient(90deg,#00E676,#5ee9a8);border-radius:inherit}
+.market-card{padding:13px 13px 12px}.market-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start}
+.market-price{text-align:right}.price{font-size:16px;font-weight:950}.change{font-size:9px;font-weight:850;margin-top:3px}.change.up{color:var(--green)}.change.down{color:var(--red)}
+.chart-wrap{margin-top:12px;background:rgba(2,6,23,.32);border:1px solid rgba(51,65,85,.45);border-radius:14px;padding:8px}
+.chart-meta{display:flex;justify-content:space-between;font-size:8px;color:#69768c;margin-bottom:4px}
+svg.spark{display:block;width:100%;height:86px;overflow:visible}.spark .grid{stroke:#26334a;stroke-width:.6}.spark .lineUp{fill:none;stroke:#00E676;stroke-width:2.2}.spark .lineDown{fill:none;stroke:#fb7185;stroke-width:2.2}.spark .areaUp{fill:url(#gup)}.spark .areaDown{fill:url(#gdown)}
+.inventory{display:flex;justify-content:space-between;gap:8px;background:rgba(2,6,23,.3);padding:8px 10px;border-radius:10px;margin-top:9px;font-size:9px;color:var(--muted)}
+.qty-row{display:grid;grid-template-columns:36px 1fr 36px;gap:6px;align-items:center;margin-top:8px}.qty-row button{height:34px;border-radius:10px;border:1px solid #334155;background:#111827;color:white;font-size:16px}.qty{height:34px;display:grid;place-items:center;background:#0b1220;border:1px solid #273449;border-radius:10px;font-size:10px;font-weight:900}
+.trade-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
+.settings-group{margin-bottom:16px}.settings-label{font-size:9px;color:#718096;text-transform:uppercase;letter-spacing:1.3px;margin-bottom:7px}
+.select{width:100%;background:#0b1220;border:1px solid #334155;color:white;border-radius:12px;padding:11px;outline:none}
+.option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.option{border:1px solid #2a374d;background:#0d1525;color:#bac4d4;border-radius:12px;padding:10px;font-size:10px;text-align:left}.option.active{border-color:rgba(0,230,118,.35);background:rgba(0,230,118,.07);color:var(--green)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.switch{width:48px;height:27px;border-radius:999px;background:#334155;position:relative;flex:0 0 48px}.switch.on{background:var(--green)}.switch:after{content:"";width:19px;height:19px;background:white;border-radius:50%;position:absolute;top:4px;left:4px;transition:.2s}.switch.on:after{left:25px}
+.event{border-left:3px solid var(--amber);padding-left:10px}.event.good{border-left-color:var(--green)}.event.bad{border-left-color:var(--red)}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;height:var(--navh);display:grid;grid-template-columns:repeat(5,1fr);background:rgba(7,11,20,.98);border-top:1px solid #1f2937;padding:7px 7px 9px;z-index:20;box-shadow:0 -14px 36px rgba(0,0,0,.22)}
+.nav button{min-width:0;border:0;background:transparent;color:#667085;padding:8px 2px;border-radius:13px;font-size:8.5px;font-weight:850;line-height:1.35;overflow:hidden}.nav button .ni{display:block;font-size:16px;line-height:1.2;margin-bottom:2px}.nav button.active{background:rgba(0,230,118,.08);color:var(--green)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:40;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px)}.modal.show{display:flex}
+.sheet{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:#0a1020;border:1px solid #334155;border-radius:28px 28px 0 0;padding:18px 16px 24px}.sheethead{display:flex;align-items:center;gap:10px;position:sticky;top:-18px;background:#0a1020;padding:18px 0 12px;z-index:2}.sheethead h2{margin:0;font-size:18px}.close{margin-left:auto;background:#1e293b;border:0;color:white;width:38px;height:38px;border-radius:11px}
+.inject{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;margin-top:9px}.inject input{min-width:0;background:#020617;border:1px solid #334155;color:white;border-radius:11px;padding:10px}
+.toast{position:fixed;left:50%;bottom:calc(var(--navh) + 10px);transform:translateX(-50%);max-width:88vw;background:#020617;border:1px solid #334155;padding:9px 13px;border-radius:11px;font-size:10px;z-index:60;display:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 12px 28px rgba(0,0,0,.35)}.toast.show{display:block}
+.insurance-list{display:grid;gap:9px}.insurance-item{border:1px solid rgba(79,93,119,.28);background:rgba(2,6,23,.25);border-radius:16px;padding:11px}.insurance-head{display:flex;align-items:center;gap:9px}.insurance-head .ii{width:36px;height:36px;border-radius:12px;background:rgba(96,165,250,.08);display:grid;place-items:center;font-size:17px}.insurance-head b{font-size:11.5px}.insurance-head p{font-size:8.5px;color:var(--muted);margin:3px 0 0;line-height:1.4}.plan-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:9px}.plan-btn{border:1px solid var(--line);background:rgba(15,23,42,.62);color:var(--muted);border-radius:10px;padding:8px 4px;font-size:8px;font-weight:850}.plan-btn.active{border-color:rgba(0,230,118,.36);background:rgba(0,230,118,.08);color:var(--green)}.offline-note{border:1px solid rgba(96,165,250,.16);background:rgba(96,165,250,.055);border-radius:14px;padding:10px 11px;font-size:9px;color:#9fb0c8;line-height:1.55}.theme-preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.theme-btn{border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:12px;padding:10px 6px;font-size:9px;font-weight:850}.theme-btn.active{border-color:rgba(0,230,118,.38);box-shadow:inset 0 0 0 1px rgba(0,230,118,.08);color:var(--green)}
+html[data-theme="light"]{--navy:#e9f0f8;--bg:#f4f7fb;--bg2:#eef3f8;--card:#ffffff;--card2:#f7f9fc;--line:#d6dfeb;--line2:#e1e7ef;--muted:#64748b;--muted2:#94a3b8;--white:#0f172a}
+html[data-theme="light"],html[data-theme="light"] body{background:#f4f7fb;color:#0f172a}
+html[data-theme="light"] body{background:radial-gradient(circle at 90% 0,rgba(0,188,99,.07),transparent 27%),linear-gradient(180deg,#eaf1f8,#f4f7fb 42%,#f8fafc)}
+html[data-theme="light"] .top{background:rgba(248,250,252,.97);border-bottom-color:#dbe4ef}
+html[data-theme="light"] .res{background:rgba(255,255,255,.92);border-color:#d9e2ec}
+html[data-theme="light"] .card{background:linear-gradient(180deg,#ffffff,#f8fafc);border-color:#dbe4ef;box-shadow:0 14px 34px rgba(15,23,42,.07)}
+html[data-theme="light"] .card.soft,html[data-theme="light"] .metric,html[data-theme="light"] .mini,html[data-theme="light"] .chart-wrap,html[data-theme="light"] .inventory{background:#f8fafc;border-color:#dce5ef}
+html[data-theme="light"] .nav{background:rgba(255,255,255,.98);border-top-color:#dbe4ef;box-shadow:0 -10px 30px rgba(15,23,42,.08)}
+html[data-theme="light"] .nav button{color:#718096}
+html[data-theme="light"] .nav button.active{color:#009e52;background:rgba(0,158,82,.08)}
+html[data-theme="light"] .btn.outline,html[data-theme="light"] .btn.ghost,html[data-theme="light"] .chip,html[data-theme="light"] .option,html[data-theme="light"] .plan-btn,html[data-theme="light"] .theme-btn{background:#f8fafc;border-color:#d7e0ea;color:#334155}
+html[data-theme="light"] .btn.dark{background:#0f172a;color:#fff}
+html[data-theme="light"] .select,html[data-theme="light"] .inject input,html[data-theme="light"] .qty,html[data-theme="light"] .qty-row button{background:#fff;border-color:#d7e0ea;color:#0f172a}
+html[data-theme="light"] .sheet{background:#f8fafc;border-color:#d7e0ea}html[data-theme="light"] .sheethead{background:#f8fafc}html[data-theme="light"] .close{background:#e2e8f0;color:#0f172a}
+html[data-theme="light"] .insurance-item{background:#f8fafc;border-color:#dce5ef}
+html[data-theme="light"] .toast{background:#fff;border-color:#cbd5e1;color:#0f172a}
+@media(max-width:360px){
+ .top{padding-left:12px;padding-right:12px}.content{padding-left:12px;padding-right:12px}.brand{grid-template-columns:40px minmax(0,1fr) auto}.logo{width:40px;height:40px}.resources{gap:5px}.res{padding:8px 3px}.res b{font-size:10px}.metrics{gap:7px}.metric{padding:10px}.flow strong{font-size:17px}.btn{font-size:9px}.territory-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand" id="brand">
+    <div class="logo">BT</div>
+    <div class="brand-copy">
+      <h1 id="companyName">Aurelius Capital</h1>
+      <div class="sub"><span id="rank">Rising Mogul</span> · Level <span id="level">7</span></div>
+    </div>
+    <div class="live">LIVE</div>
+  </div>
+  <div class="resources">
+    <div class="res" id="cashBox"><b id="cashVal"></b><span>Cash</span></div>
+    <div class="res positive"><b id="worthVal"></b><span>Net Worth</span></div>
+    <div class="res"><b id="coinsVal"></b><span>Gold</span></div>
+    <div class="res"><b id="diamondsVal"></b><span>Diamonds</span></div>
+  </div>
+</header>
+
+<main class="content">
+  <div class="flow">
+    <div><small>Passive Cash Flow</small><strong id="flowVal"></strong></div>
+    <div class="pill" id="cycleLabel">5 sec cycle</div>
+  </div>
+  <div id="view"></div>
+</main>
+
+<nav class="nav">
+  <button data-tab="company" class="active"><span class="ni">🏢</span>Company</button>
+  <button data-tab="assets"><span class="ni">🏠</span>Assets</button>
+  <button data-tab="business"><span class="ni">🏭</span>Business</button>
+  <button data-tab="market"><span class="ni">📈</span>Market</button>
+  <button data-tab="settings"><span class="ni">⚙️</span>Settings</button>
+</nav>
+</div>
+
+<div class="modal" id="adminModal">
+  <div class="sheet">
+    <div class="sheethead">
+      <div class="icon">🔐</div>
+      <div><div class="eyebrow" style="color:#c4b5fd">God Mode</div><h2>Developer Admin Suite</h2></div>
+      <button class="close" onclick="closeAdmin()">✕</button>
+    </div>
+    <div class="card">
+      <b>Resource Injection</b>
+      <div class="inject"><input id="cashIn" type="number" inputmode="decimal" placeholder="Add Cash"><button class="btn" style="background:#8b5cf6;color:#fff" onclick="inject('cash','cashIn')">Inject</button></div>
+      <div class="inject"><input id="coinIn" type="number" inputmode="decimal" placeholder="Add Gold Coins"><button class="btn" style="background:#8b5cf6;color:#fff" onclick="inject('goldCoins','coinIn')">Inject</button></div>
+      <div class="inject"><input id="diaIn" type="number" inputmode="decimal" placeholder="Add Diamonds"><button class="btn" style="background:#8b5cf6;color:#fff" onclick="inject('diamonds','diaIn')">Inject</button></div>
+    </div>
+    <div class="card toggle-row">
+      <div><b>Instant Completion Engine</b><p style="font-size:10px;color:#7f8ba3;margin:4px 0 0">Executes passive cycles every 100 ms.</p></div>
+      <div id="adminSwitch" class="switch" onclick="toggleInstant()"></div>
+    </div>
+    <button class="btn wide danger" onclick="marketFactor(.4,'Global market crash executed')">Force Global Market Crash (-60%)</button>
+    <button class="btn wide" style="background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);color:#6ee7b7" onclick="marketFactor(2.2,'Commodity boom executed')">Force Commodity Boom (+120%)</button>
+    <button class="btn wide" style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.22);color:#fde68a" onclick="forceDisaster()">Force Disaster Event</button>
+    <button class="btn wide" style="background:linear-gradient(90deg,#8b5cf6,#d946ef);color:#fff" onclick="maximize()">👑 Maximize All Levels</button>
+    <button class="btn wide outline" onclick="closeAdmin()">Close Admin Suite</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const FX={
+ USD:{r:1,label:"US Dollar"},INR:{r:83.9,label:"Indian Rupee"},EUR:{r:.92,label:"Euro"},
+ GBP:{r:.78,label:"British Pound"},QAR:{r:3.64,label:"Qatari Riyal"},AED:{r:3.67,label:"UAE Dirham"},JPY:{r:146,label:"Japanese Yen"}
+};
+const STAFF=[
+ {name:"Analyst",cost:12000,income:55,icon:"🧑‍💻",note:"Market intelligence"},
+ {name:"Manager",cost:35000,income:160,icon:"🧑‍💼",note:"Operational leverage"},
+ {name:"Director",cost:98000,income:480,icon:"👔",note:"Executive growth"}
+];
+const TERR=[
+ {name:"USA",cost:250000,mult:1.45,code:"US",note:"Deep capital markets"},
+ {name:"Germany",cost:475000,mult:1.70,code:"DE",note:"Industrial powerhouse"},
+ {name:"Canada",cost:720000,mult:1.95,code:"CA",note:"Stable expansion"},
+ {name:"Singapore",cost:1200000,mult:2.25,code:"SG",note:"Global finance hub"},
+ {name:"Japan",cost:2200000,mult:2.65,code:"JP",note:"Premium enterprise market"}
+];
+const PROP=[
+ {name:"House",icon:"🏠",buy:110000,rent:750,upgrade:26000,app:1.10},
+ {name:"Flat",icon:"🏢",buy:165000,rent:1150,upgrade:39000,app:1.11},
+ {name:"Apartment",icon:"🌆",buy:280000,rent:2050,upgrade:65000,app:1.12},
+ {name:"Villa",icon:"🏡",buy:520000,rent:3900,upgrade:120000,app:1.13},
+ {name:"Commercial Office",icon:"🏬",buy:900000,rent:7200,upgrade:210000,app:1.14}
+];
+const VEH=[
+ {name:"Bike",icon:"🏍️",buy:12000,resale:.72,income:20,upgrade:4500,note:"Last-mile mobility"},
+ {name:"Car",icon:"🚗",buy:38000,resale:.70,income:42,upgrade:11000,note:"Executive transport"},
+ {name:"Truck",icon:"🚚",buy:95000,resale:.68,income:150,upgrade:28000,note:"Boosts logistics income"},
+ {name:"Luxury Car",icon:"🏎️",buy:185000,resale:.67,income:85,upgrade:52000,note:"Luxury fleet"},
+ {name:"Helicopter",icon:"🚁",buy:950000,resale:.64,income:650,upgrade:240000,note:"Premium corporate aviation"},
+ {name:"Private Jet",icon:"✈️",buy:4500000,resale:.62,income:2600,upgrade:1100000,note:"International aviation asset"},
+ {name:"Yacht",icon:"🛥️",buy:6200000,resale:.60,income:3100,upgrade:1450000,note:"Luxury marine charter"}
+];
+const BIZ=[
+ {name:"Oil Extraction",cat:"Energy",icon:"🛢️",cost:450000,income:1200,upgrade:165000,links:[]},
+ {name:"Oil Refinery",cat:"Energy",icon:"🏭",cost:950000,income:2700,upgrade:340000,links:[["Oil Extraction",.25]]},
+ {name:"Solar Farm",cat:"Energy",icon:"☀️",cost:320000,income:780,upgrade:115000,links:[]},
+ {name:"Mining Company",cat:"Resources",icon:"⛏️",cost:620000,income:1550,upgrade:220000,links:[]},
+ {name:"Steel Plant",cat:"Industry",icon:"🔩",cost:1100000,income:3100,upgrade:390000,links:[["Mining Company",.20]]},
+ {name:"Cement Plant",cat:"Industry",icon:"🧱",cost:780000,income:2100,upgrade:275000,links:[["Mining Company",.10]]},
+ {name:"Construction Co.",cat:"Real Estate",icon:"🏗️",cost:1250000,income:3600,upgrade:445000,links:[["Steel Plant",.18],["Cement Plant",.18]]},
+ {name:"Real Estate Developer",cat:"Real Estate",icon:"🏙️",cost:1800000,income:5200,upgrade:620000,links:[["Construction Co.",.30]]},
+ {name:"Automobile Factory",cat:"Industry",icon:"🚘",cost:1600000,income:4400,upgrade:570000,links:[["Steel Plant",.16],["Oil Refinery",.08]]},
+ {name:"Logistics Company",cat:"Transport",icon:"🚛",cost:700000,income:1900,upgrade:245000,links:[["Automobile Factory",.08]]},
+ {name:"Airline",cat:"Transport",icon:"🛫",cost:5200000,income:14500,upgrade:1850000,links:[["Oil Refinery",.12],["Logistics Company",.08]]},
+ {name:"Shipping Line",cat:"Transport",icon:"🚢",cost:4300000,income:11800,upgrade:1500000,links:[["Oil Refinery",.12],["Logistics Company",.12]]},
+ {name:"Agriculture Farm",cat:"Food",icon:"🌾",cost:210000,income:520,upgrade:76000,links:[]},
+ {name:"Food Processing",cat:"Food",icon:"🥫",cost:580000,income:1500,upgrade:205000,links:[["Agriculture Farm",.28],["Logistics Company",.08]]},
+ {name:"Retail Chain",cat:"Consumer",icon:"🛒",cost:900000,income:2450,upgrade:320000,links:[["Logistics Company",.20],["Food Processing",.10]]},
+ {name:"Hotel Chain",cat:"Consumer",icon:"🏨",cost:2200000,income:5900,upgrade:780000,links:[["Food Processing",.10],["Airline",.10]]},
+ {name:"Technology Firm",cat:"Technology",icon:"💻",cost:1350000,income:3900,upgrade:475000,links:[]},
+ {name:"Data Center",cat:"Technology",icon:"🖥️",cost:2450000,income:6700,upgrade:860000,links:[["Technology Firm",.25],["Solar Farm",.10]]},
+ {name:"Bank & Finance",cat:"Finance",icon:"🏦",cost:3500000,income:9800,upgrade:1200000,links:[["Technology Firm",.12],["Real Estate Developer",.08]]},
+ {name:"Pharma Company",cat:"Industry",icon:"💊",cost:2800000,income:7600,upgrade:980000,links:[["Technology Firm",.10]]}
+];
+const DISASTERS=[
+ {name:"Severe Flood",type:"Natural",category:"property",emoji:"🌊",sev:.018,text:"Flooding damaged property and interrupted operations."},
+ {name:"Earthquake",type:"Natural",category:"disaster",emoji:"🌎",sev:.026,text:"Infrastructure damage caused an unexpected capital loss."},
+ {name:"Cyclone",type:"Natural",category:"disaster",emoji:"🌀",sev:.020,text:"Weather disruption damaged facilities and logistics."},
+ {name:"Property Fire",type:"Accident",category:"property",emoji:"🏠",sev:.014,text:"A major property fire damaged insured real-estate assets."},
+ {name:"Vehicle Accident",type:"Accident",category:"vehicle",emoji:"🚗",sev:.010,text:"A serious fleet accident generated repair and replacement costs."},
+ {name:"Refinery Fire",type:"Man-made",category:"company",emoji:"🔥",sev:.017,text:"An industrial fire caused an emergency operating loss."},
+ {name:"Cyberattack",type:"Man-made",category:"company",emoji:"🛡️",sev:.013,text:"A cyber incident interrupted digital operations and settlements."},
+ {name:"Supply Chain Strike",type:"Man-made",category:"company",emoji:"⚠️",sev:.010,text:"A labor disruption produced supply-chain losses."},
+ {name:"Personal Medical Emergency",type:"Personal",category:"personal",emoji:"🏥",sev:.006,text:"An unexpected personal emergency required a large cash outflow."}
+];
+const INSURANCE={
+ disaster:{label:"Disaster Insurance",icon:"🛡️",note:"Natural and major man-made catastrophe protection.",base:"networth",plans:{
+   off:{label:"Off",coverage:0,rate:0,min:0},basic:{label:"Basic",coverage:.45,rate:.00008,min:45},premium:{label:"Premium",coverage:.75,rate:.00015,min:90}
+ }},
+ property:{label:"Flat / Property Insurance",icon:"🏠",note:"Covers houses, flats, apartments, villas and offices.",base:"property",plans:{
+   off:{label:"Off",coverage:0,rate:0,min:0},basic:{label:"Standard",coverage:.60,rate:.00011,min:30},premium:{label:"Premium",coverage:.90,rate:.00021,min:65}
+ }},
+ vehicle:{label:"Car / Vehicle Insurance",icon:"🚘",note:"Covers bikes, cars, trucks, aircraft and yachts.",base:"vehicle",plans:{
+   off:{label:"Off",coverage:0,rate:0,min:0},basic:{label:"Standard",coverage:.55,rate:.00014,min:24},premium:{label:"Premium",coverage:.85,rate:.00025,min:55}
+ }},
+ company:{label:"Company Insurance",icon:"🏢",note:"Business interruption, industrial and cyber protection.",base:"company",plans:{
+   off:{label:"Off",coverage:0,rate:0,min:0},basic:{label:"Standard",coverage:.50,rate:.00007,min:55},premium:{label:"Premium",coverage:.80,rate:.00013,min:110}
+ }},
+ personal:{label:"Personal Insurance",icon:"❤️",note:"Personal accident and emergency protection for the tycoon.",base:"personal",plans:{
+   off:{label:"Off",coverage:0,rate:0,min:0},basic:{label:"Essential",coverage:.50,rate:0,min:35},premium:{label:"Premium",coverage:.80,rate:0,min:75}
+ }}
+};
+const MARKET_BASE={
+ Wheat:{p:6.40,base:6.40,v:.035,symbol:"WHT"},
+ "Crude Oil":{p:82.50,base:82.50,v:.030,symbol:"OIL"},
+ Silver:{p:28.75,base:28.75,v:.025,symbol:"SLV"},
+ Gold:{p:2345.10,base:2345.10,v:.018,symbol:"GLD"}
+};
+const DEFAULT={
+ companyName:"Aurelius Capital",rank:"Rising Mogul",level:7,cash:185250,goldCoins:420,diamonds:28,
+ efficiency:3,baseIncome:125,totalEarned:428700,currency:"USD",theme:"dark",instant:false,
+ staff:{Analyst:2,Manager:1,Director:0},territories:["Home Market"],
+ inventory:{Wheat:0,"Crude Oil":0,Silver:0,Gold:0},tradeQty:{Wheat:1,"Crude Oil":1,Silver:1,Gold:1},
+ properties:{},vehicles:{},businesses:{},market:{},taxRate:.18,taxDue:0,taxRecovered:0,
+ collectionIntervalMin:60,lastEconomyAt:Date.now(),lastCollectionAt:Date.now(),lastRiskAt:Date.now(),
+ insurancePlans:{disaster:"off",property:"off",vehicle:"off",company:"off",personal:"off"},
+ insurancePaidTotal:0,insuranceClaimsTotal:0,insuranceArrears:0,
+ disasterLossTotal:0,lastDisaster:null,lastBackgroundReport:null,nativeAppliedAt:0
+};
+function deepCopy(o){return JSON.parse(JSON.stringify(o))}
+function loadGame(){
+ let x=deepCopy(DEFAULT);
+ try{const p=JSON.parse(localStorage.getItem("bt-v3")||localStorage.getItem("bt-v2")||localStorage.getItem("bt-mobile")||"{}");x=Object.assign(x,p)}catch(e){}
+ x.staff=Object.assign({},DEFAULT.staff,x.staff||{});
+ x.inventory=Object.assign({},DEFAULT.inventory,x.inventory||{});
+ x.tradeQty=Object.assign({},DEFAULT.tradeQty,x.tradeQty||{});
+ x.properties=x.properties||{};x.vehicles=x.vehicles||{};x.businesses=x.businesses||{};
+ x.theme=x.theme||"dark";x.collectionIntervalMin=[30,60].includes(Number(x.collectionIntervalMin))?Number(x.collectionIntervalMin):60;
+ x.lastEconomyAt=Number(x.lastEconomyAt)||Date.now();x.lastCollectionAt=Number(x.lastCollectionAt||x.lastTaxRecovery)||Date.now();x.lastRiskAt=Number(x.lastRiskAt||x.lastDisasterCheck)||Date.now();
+ x.insurancePlans=Object.assign({},DEFAULT.insurancePlans,x.insurancePlans||{});
+ if(x.insurance===true && x.insurancePlans.disaster==="off")x.insurancePlans.disaster="premium";
+ x.insurancePaidTotal=Number(x.insurancePaidTotal)||0;x.insuranceClaimsTotal=Number(x.insuranceClaimsTotal)||0;x.insuranceArrears=Number(x.insuranceArrears)||0;
+ for(const d of PROP) if(!x.properties[d.name]) x.properties[d.name]={owned:0,rented:0,level:1};
+ for(const d of VEH) if(!x.vehicles[d.name]) x.vehicles[d.name]={owned:0,level:1};
+ for(const d of BIZ) if(!x.businesses[d.name]) x.businesses[d.name]={owned:0,level:1};
+ const migrated={};
+ for(const [name,b] of Object.entries(MARKET_BASE)){
+   const old=(x.market||{})[name]||{};
+   let p=Number(old.p ?? old.price ?? b.p); if(!Number.isFinite(p)||p<=0)p=b.p;
+   let history=Array.isArray(old.history)?old.history.map(Number).filter(Number.isFinite).slice(-30):[];
+   if(history.length<8){history=[];let cur=p;for(let i=0;i<12;i++){cur=Math.max(b.base*.4,cur*(1+(Math.random()-.5)*b.v*.5));history.push(Number(cur.toFixed(2)))}p=history[history.length-1]}
+   migrated[name]={...b,...old,p,prev:Number(old.prev ?? old.previousPrice ?? p),history};
+ }
+ x.market=migrated;
+ return x
+}
+let g=loadGame(),tab="company",assetMode="property",bizFilter="All",passiveTimer=null,uiTimer=null,pressTimer=null;
+function save(){localStorage.setItem("bt-v3",JSON.stringify(g))}
+function fxAmount(usd){return Number(usd||0)*(FX[g.currency]?.r||1)}
+function money(usd,compact=false){
+ const value=fxAmount(usd),code=g.currency||"USD";
+ try{return new Intl.NumberFormat(code==="INR"?"en-IN":"en-US",{style:"currency",currency:code,notation:compact?"compact":"standard",maximumFractionDigits:compact?1:(code==="JPY"?0:(Math.abs(value)<100?2:0))}).format(value)}
+ catch(e){return code+" "+value.toFixed(2)}
+}
+function num(n){return new Intl.NumberFormat("en-US",{maximumFractionDigits:0}).format(Number(n)||0)}
+function territoryMult(){return TERR.reduce((m,t)=>g.territories.includes(t.name)?m*t.mult:m,1)}
+function staffIncome(){return STAFF.reduce((s,x)=>s+(g.staff[x.name]||0)*x.income,0)}
+function companyIncome(){return (g.baseIncome+staffIncome())*(1+g.efficiency*.18)*territoryMult()}
+function propertyValueDef(d,state){return d.buy*Math.pow(d.app,Math.max(0,state.level-1))}
+function propertyRentDef(d,state){return d.rent*Math.pow(1.24,Math.max(0,state.level-1))}
+function propertyIncome(){return PROP.reduce((s,d)=>{const st=g.properties[d.name];return s+st.rented*propertyRentDef(d,st)},0)}
+function vehicleValueDef(d,st){return d.buy*Math.pow(1.10,Math.max(0,st.level-1))}
+function vehicleIncome(){return VEH.reduce((s,d)=>{const st=g.vehicles[d.name];let bonus=1;if(d.name==="Truck"&&(g.businesses["Logistics Company"]?.owned||0)>0)bonus=1.35;if(d.name==="Private Jet"&&(g.businesses["Airline"]?.owned||0)>0)bonus=1.25;if(d.name==="Yacht"&&(g.businesses["Hotel Chain"]?.owned||0)>0)bonus=1.18;return s+st.owned*d.income*Math.pow(1.16,st.level-1)*bonus},0)}
+function bizSynergy(d){
+ let bonus=0,active=[];
+ for(const [name,pct] of d.links){if((g.businesses[name]?.owned||0)>0){bonus+=pct;active.push([name,pct])}}
+ if(d.name==="Logistics Company"&&(g.vehicles["Truck"]?.owned||0)>0){bonus+=.10;active.push(["Truck Fleet",.10])}
+ if(d.name==="Airline"&&(g.vehicles["Private Jet"]?.owned||0)>0){bonus+=.08;active.push(["Private Jet",.08])}
+ return {mult:1+bonus,active}
+}
+function businessIncome(){
+ return BIZ.reduce((s,d)=>{const st=g.businesses[d.name];if(!st.owned)return s;return s+st.owned*d.income*Math.pow(1.22,st.level-1)*bizSynergy(d).mult},0)*territoryMult()
+}
+function insuranceExposure(type){
+ if(type==="property")return propertyAssets();
+ if(type==="vehicle")return vehicleAssets();
+ if(type==="company")return companyAssets()+businessAssets();
+ if(type==="personal")return Math.max(50000,Math.abs(netWorth())*.15);
+ return Math.max(50000,Math.abs(netWorth()));
+}
+function insurancePlan(type){const tier=g.insurancePlans?.[type]||"off";return INSURANCE[type].plans[tier]||INSURANCE[type].plans.off}
+function insurancePremiumFor(type){const p=insurancePlan(type);if(!p.rate)return p.min||0;return Math.max(p.min||0,insuranceExposure(type)*p.rate)}
+function insurancePremiumTotal(){return Object.keys(INSURANCE).reduce((sum,type)=>sum+insurancePremiumFor(type),0)}
+function insuranceCoverageFor(event){const specific=insurancePlan(event.category)?.coverage||0;const catastrophe=(event.type==="Natural"||event.type==="Man-made")?(insurancePlan("disaster").coverage||0):0;return Math.min(.95,Math.max(specific,catastrophe))}
+function passiveGross(){return companyIncome()+propertyIncome()+vehicleIncome()+businessIncome()}
+function passiveNet(){return passiveGross()}
+function inventoryValue(){return Object.entries(g.inventory).reduce((s,[k,q])=>s+q*(g.market[k]?.p||0),0)}
+function propertyAssets(){return PROP.reduce((s,d)=>{const st=g.properties[d.name];return s+st.owned*propertyValueDef(d,st)},0)}
+function vehicleAssets(){return VEH.reduce((s,d)=>{const st=g.vehicles[d.name];return s+st.owned*vehicleValueDef(d,st)},0)}
+function businessAssets(){return BIZ.reduce((s,d)=>{const st=g.businesses[d.name];return s+st.owned*d.cost*Math.pow(1.12,st.level-1)},0)}
+function companyAssets(){return STAFF.reduce((s,x)=>s+(g.staff[x.name]||0)*x.cost*.75,0)+TERR.reduce((s,t)=>s+(g.territories.includes(t.name)?t.cost:0),0)+g.efficiency*25000}
+function netWorth(){return g.cash+inventoryValue()+propertyAssets()+vehicleAssets()+businessAssets()+companyAssets()-g.taxDue}
+function toast(t){const e=document.getElementById("toast");e.textContent=t;e.classList.add("show");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("show"),2100)}
+function sectionHead(ey,title,action=""){return `<div class="section-head"><div><div class="eyebrow">${ey}</div><h2>${title}</h2></div>${action}</div>`}
+function metric(l,v,cls=""){return `<div class="metric"><span>${l}</span><b class="${cls}">${v}</b></div>`}
+function mini(l,v,cls=""){return `<div class="mini"><span>${l}</span><b class="${cls}">${v}</b></div>`}
+function header(){
+ document.getElementById("companyName").textContent=g.companyName;
+ document.getElementById("rank").textContent=g.rank;
+ document.getElementById("level").textContent=g.level;
+ const cashEl=document.getElementById("cashVal"),cashBox=document.getElementById("cashBox");
+ cashEl.textContent=money(g.cash,true);cashBox.classList.toggle("positive",g.cash>=0);cashBox.classList.toggle("negative",g.cash<0);
+ document.getElementById("worthVal").textContent=money(netWorth(),true);
+ document.getElementById("coinsVal").textContent=num(g.goldCoins);
+ document.getElementById("diamondsVal").textContent=num(g.diamonds);
+ const p=passiveNet();document.getElementById("flowVal").textContent=(p>=0?"+":"")+money(p)+" / cycle";
+ document.getElementById("flowVal").className=p>=0?"green":"red";
+ document.getElementById("cycleLabel").textContent=g.instant?"Instant Engine":"5 sec · background";
+ document.getElementById("adminSwitch").classList.toggle("on",g.instant)
+}
+function companyPage(){
+ const op=(g.staff.Analyst*18+g.staff.Manager*52+g.staff.Director*145)*5;
+ const upgrade=55000*Math.pow(1.7,g.efficiency-1);
+ const intervalMs=(Number(g.collectionIntervalMin)||60)*60000,dueIn=Math.max(0,Math.ceil((intervalMs-(Date.now()-g.lastCollectionAt))/60000));
+ const last=g.lastDisaster;
+ return `
+ <section class="section">${sectionHead("Executive Dashboard","Company Overview")}
+   <div class="card"><div class="metrics">
+    ${metric("Revenue / Cycle",money(passiveGross()),"green")}
+    ${metric("Global Multiplier",territoryMult().toFixed(2)+"×")}
+    ${metric("Asset Portfolio",money(propertyAssets()+vehicleAssets()+businessAssets()))}
+    ${metric("Corporate Net Worth",money(netWorth()),netWorth()>=0?"green":"red")}
+   </div></div>
+ </section>
+ <section class="section">${sectionHead("Operations","Efficiency Core",`<span class="section-action">Level ${g.efficiency}</span>`)}
+   <div class="card"><div class="row"><div class="icon">⚡</div><div class="grow"><h3>Baseline Operational Efficiency</h3><p>Each level adds 18% to core company passive income.</p></div></div>
+   <button class="btn wide primary" onclick="upgradeEfficiency()">Upgrade Efficiency · ${money(upgrade)}</button></div>
+ </section>
+ <section class="section">${sectionHead("People","Core Staff")}
+   ${STAFF.map(x=>`<div class="card row"><div class="icon">${x.icon}</div><div class="grow"><h3>${x.name} · ${g.staff[x.name]||0}</h3><p>${x.note} · +${money(x.income)}/cycle</p></div><button class="btn dark" onclick="hire('${x.name}')">Hire ${money(x.cost,true)}</button></div>`).join("")}
+ </section>
+ <section class="section">${sectionHead("Government","Tax Recovery",`<span class="section-action">${dueIn} min</span>`)}
+   <div class="card">
+    <div class="metrics">${metric("Corporate Tax Rate",(g.taxRate*100).toFixed(0)+"%")}${metric("Tax Due",money(g.taxDue),g.taxDue>0?"amber":"green")}${metric("Lifetime Recovered",money(g.taxRecovered))}${metric("Collection",g.collectionIntervalMin+" min")}</div>
+    <button class="btn wide outline" onclick="payTaxNow()">Pay Tax Now · ${money(g.taxDue)}</button>
+    <p style="font-size:9px;color:#7e8aa3;line-height:1.5;margin:9px 1px 0">Tax accrues on passive operating income and is automatically recovered every ${g.collectionIntervalMin} minutes. Insurance premiums use the same collection schedule.</p>
+   </div>
+ </section>
+ <section class="section">${sectionHead("Risk Management","Disaster & Insurance")}
+   <div class="card"><div class="row"><div class="icon greenbg">🛡️</div><div class="grow"><h3>Insurance Portfolio</h3><p>${activeInsuranceCount()} active policies · next automatic premium ${money(insurancePremiumTotal())} every ${g.collectionIntervalMin} minutes.</p></div><button class="btn outline" onclick="openSettingsInsurance()">Manage</button></div></div>
+   ${last?`<div class="card event ${last.netLoss>0?"bad":"good"}"><div class="row"><div class="icon">${last.emoji}</div><div class="grow"><h3>${last.name} · ${last.type}</h3><p>${last.text}</p><p><b class="red">Net loss ${money(last.netLoss)}</b>${last.covered?` · Insurance covered ${money(last.covered)}`:""}</p></div></div></div>`:`<div class="card soft"><p style="font-size:10px;color:#7e8aa3;margin:0">No major disaster has affected your company yet. Risk checks run in the background.</p></div>`}
+ </section>
+ <section class="section">${sectionHead("Global Expansion","World Territories")}
+  <div class="card"><div class="hero-map"><div><b>${g.territories.length-1} territories live</b><p style="font-size:9px;color:#7f8ba3;margin:4px 0 0">Territories multiply company and business income globally.</p></div></div></div>
+  <div class="territory-grid">${TERR.map(t=>{const u=g.territories.includes(t.name);return `<div class="card territory ${u?"unlocked":""}"><div class="row"><div class="code">${t.code}</div><div class="grow"><h3>${t.name}${u?" ✓":""}</h3><p>${t.mult.toFixed(2)}× income</p></div></div><button class="btn wide ${u?"ghost":"dark"}" ${u?"disabled":""} onclick="unlockTerritory('${t.name}')">${u?"Unlocked":"Unlock "+money(t.cost,true)}</button></div>`}).join("")}</div>
+ </section>
+ <section class="section">${sectionHead("Finance","Financial Statement")}
+  <div class="card">
+   <div class="statement"><span>Core company income</span><b class="green">${money(companyIncome())}</b></div>
+   <div class="statement"><span>Property rental income</span><b class="green">${money(propertyIncome())}</b></div>
+   <div class="statement"><span>Business income</span><b class="green">${money(businessIncome())}</b></div>
+   <div class="statement"><span>Vehicle income</span><b class="green">${money(vehicleIncome())}</b></div>
+   <div class="statement"><span>Insurance premium / collection</span><b class="${insurancePremiumTotal()>0?"red":""}">${insurancePremiumTotal()>0?"-"+money(insurancePremiumTotal()):money(0)}</b></div>
+   <div class="statement"><span>Estimated staff overhead</span><b class="red">-${money(op)}</b></div>
+   <div class="statement"><span>Lifetime disaster losses</span><b class="red">-${money(g.disasterLossTotal)}</b></div>
+   <div class="statement"><span>Lifetime gross earnings</span><b class="green">${money(g.totalEarned)}</b></div>
+  </div>
+ </section>`
+}
+function propertyCard(d){
+ const st=g.properties[d.name],value=propertyValueDef(d,st),rent=propertyRentDef(d,st),upCost=d.upgrade*Math.pow(1.55,st.level-1),available=st.owned-st.rented;
+ return `<div class="card asset-card">
+  <div class="asset-top"><div class="icon">${d.icon}</div><div class="grow"><div class="row" style="align-items:flex-start"><div class="grow"><h3>${d.name} · L${st.level}</h3><p>Owned ${st.owned} · Rented out ${st.rented} · Vacant ${available}</p></div><b class="green" style="font-size:12px">${money(value,true)}</b></div></div></div>
+  <div class="asset-values">${mini("Unit Value",money(value))}${mini("Rent / Cycle",money(rent),"green")}${mini("Portfolio",money(value*st.owned))}</div>
+  <div class="action-row"><button class="btn dark" onclick="buyProperty('${d.name}')">Buy ${money(d.buy,true)}</button><button class="btn primary" ${available<=0?"disabled":""} onclick="rentOut('${d.name}')">Rent Out</button><button class="btn outline" ${st.rented<=0?"disabled":""} onclick="endRent('${d.name}')">Vacate</button></div>
+  <div class="action-row two"><button class="btn ghost" ${st.owned<=0?"disabled":""} onclick="upgradeProperty('${d.name}')">Upgrade ${money(upCost,true)}</button><button class="btn danger" ${available<=0?"disabled":""} onclick="sellProperty('${d.name}')">Sell ${money(value*.92,true)}</button></div>
+ </div>`
+}
+function vehicleCard(d){
+ const st=g.vehicles[d.name],value=vehicleValueDef(d,st),upCost=d.upgrade*Math.pow(1.5,st.level-1),income=d.income*Math.pow(1.16,st.level-1);
+ return `<div class="card asset-card"><div class="asset-top"><div class="icon">${d.icon}</div><div class="grow"><div class="row"><div class="grow"><h3>${d.name} · L${st.level}</h3><p>${d.note} · Owned ${st.owned}</p></div><b class="green">${money(value,true)}</b></div></div></div>
+  <div class="asset-values">${mini("Unit Value",money(value))}${mini("Income / Cycle",money(income),"green")}${mini("Resale",money(value*d.resale))}</div>
+  <div class="action-row"><button class="btn dark" onclick="buyVehicle('${d.name}')">Buy ${money(d.buy,true)}</button><button class="btn ghost" ${st.owned<=0?"disabled":""} onclick="upgradeVehicle('${d.name}')">Upgrade</button><button class="btn danger" ${st.owned<=0?"disabled":""} onclick="sellVehicle('${d.name}')">Sell</button></div></div>`
+}
+function assetsPage(){
+ return `<section class="section">${sectionHead("Wealth Management","Assets")}
+  <div class="chips"><button class="chip ${assetMode==="property"?"active":""}" onclick="setAssetMode('property')">🏠 Property</button><button class="chip ${assetMode==="vehicle"?"active":""}" onclick="setAssetMode('vehicle')">🚘 Vehicles</button></div>
+ </section>
+ <section class="section"><div class="card"><div class="metrics">${metric("Property Value",money(propertyAssets()),"green")}${metric("Vehicle Value",money(vehicleAssets()),"green")}${metric("Rental Income",money(propertyIncome())+"/cycle","green")}${metric("Vehicle Income",money(vehicleIncome())+"/cycle","green")}</div></div></section>
+ ${assetMode==="property"?PROP.map(propertyCard).join(""):VEH.map(vehicleCard).join("")}`
+}
+function businessCard(d){
+ const st=g.businesses[d.name],sy=bizSynergy(d),income=st.owned*d.income*Math.pow(1.22,st.level-1)*sy.mult*territoryMult(),up=d.upgrade*Math.pow(1.58,st.level-1);
+ return `<div class="card"><div class="row"><div class="icon">${d.icon}</div><div class="grow"><h3>${d.name} · L${st.level}</h3><p>${d.cat} · Owned ${st.owned}</p></div><b class="green">${money(income,true)}/c</b></div>
+ ${sy.active.length?`<div class="badges">${sy.active.map(x=>`<span class="badge good">+${Math.round(x[1]*100)}% from ${x[0]}</span>`).join("")}</div>`:`<div class="badges"><span class="badge">No active linked-business synergy</span></div>`}
+ <div class="asset-values">${mini("Acquire",money(d.cost))}${mini("Base Income",money(d.income))}${mini("Synergy",((sy.mult-1)*100).toFixed(0)+"%","green")}</div>
+ <div class="action-row"><button class="btn dark" onclick="buyBusiness('${d.name}')">Acquire</button><button class="btn primary" ${st.owned<=0?"disabled":""} onclick="upgradeBusiness('${d.name}')">Upgrade ${money(up,true)}</button><button class="btn danger" ${st.owned<=0?"disabled":""} onclick="sellBusiness('${d.name}')">Sell</button></div></div>`
+}
+function businessPage(){
+ const cats=["All",...new Set(BIZ.map(x=>x.cat))],visible=BIZ.filter(x=>bizFilter==="All"||x.cat===bizFilter),synergies=BIZ.reduce((n,d)=>n+(bizSynergy(d).active.length>0&&g.businesses[d.name].owned>0?1:0),0);
+ return `<section class="section">${sectionHead("Empire","Business Portfolio")}
+ <div class="card"><div class="metrics">${metric("Business Value",money(businessAssets()),"green")}${metric("Business Income",money(businessIncome())+"/cycle","green")}${metric("Active Synergies",synergies)}${metric("Global Multiplier",territoryMult().toFixed(2)+"×")}</div></div>
+ <div class="chips">${cats.map(c=>`<button class="chip ${bizFilter===c?"active":""}" onclick="setBizFilter('${c}')">${c}</button>`).join("")}</div></section>
+ ${visible.map(businessCard).join("")}`
+}
+function chartSvg(name,m){
+ const a=m.history&&m.history.length?m.history:[m.p],min=Math.min(...a),max=Math.max(...a),range=Math.max(.0001,max-min),w=300,h=82,pad=5;
+ const pts=a.map((v,i)=>{const x=pad+(i/(Math.max(1,a.length-1)))*(w-pad*2),y=pad+(1-(v-min)/range)*(h-pad*2);return [x,y]});
+ const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)).join(" "),area=line+` L${pts[pts.length-1][0]},${h} L${pts[0][0]},${h} Z`,up=a[a.length-1]>=a[0],id=name.replace(/\W/g,"");
+ return `<div class="chart-wrap"><div class="chart-meta"><span>Past ${a.length} ticks</span><span>Low ${money(min)} · High ${money(max)}</span></div><svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><defs><linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${up?"#00E676":"#fb7185"}" stop-opacity=".28"/><stop offset="100%" stop-color="${up?"#00E676":"#fb7185"}" stop-opacity="0"/></linearGradient></defs><line class="grid" x1="0" y1="25" x2="300" y2="25"/><line class="grid" x1="0" y1="55" x2="300" y2="55"/><path d="${area}" fill="url(#${id}g)"/><path d="${line}" class="${up?"lineUp":"lineDown"}"/></svg></div>`
+}
+function marketPage(){
+ return `<section class="section">${sectionHead("Live Exchange","Commodity Market",`<span class="section-action">5s price feed</span>`)}<div class="card"><div class="metrics">${metric("Trading Cash",money(g.cash),g.cash>=0?"green":"red")}${metric("Inventory Value",money(inventoryValue()),"green")}</div></div></section>
+ ${Object.entries(g.market).map(([name,m])=>{const prev=m.prev||m.p,ch=prev?((m.p-prev)/prev*100):0,up=ch>=0,q=g.tradeQty[name]||1;return `<div class="card market-card"><div class="market-top"><div><h3 style="margin:0;font-size:13px">${name}</h3><p style="font-size:8px;color:#667085;margin:4px 0">${m.symbol} · Live commodity</p></div><div class="market-price"><div class="price">${money(m.p)}</div><div class="change ${up?"up":"down"}">${up?"▲":"▼"} ${Math.abs(ch).toFixed(2)}%</div></div></div>
+ ${chartSvg(name,m)}<div class="inventory"><span>Inventory <b style="color:white">${g.inventory[name]} units</b></span><span>Position <b style="color:white">${money(g.inventory[name]*m.p)}</b></span></div>
+ <div class="qty-row"><button onclick="changeQty('${name}',-1)">−</button><div class="qty">${q} unit${q>1?"s":""}</div><button onclick="changeQty('${name}',1)">+</button></div>
+ <div class="trade-actions"><button class="btn primary" onclick="trade('${name}','buy')">BUY · ${money(m.p*q)}</button><button class="btn outline" onclick="trade('${name}','sell')">SELL · ${money(m.p*q)}</button></div></div>`}).join("")}`
+}
+function activeInsuranceCount(){return Object.keys(INSURANCE).filter(k=>(g.insurancePlans?.[k]||"off")!=="off").length}
+function insuranceCard(type){
+ const cfg=INSURANCE[type],tier=g.insurancePlans?.[type]||"off",plan=insurancePlan(type),premium=insurancePremiumFor(type);
+ return `<div class="insurance-item"><div class="insurance-head"><div class="ii">${cfg.icon}</div><div class="grow"><b>${cfg.label}</b><p>${cfg.note}</p></div><div style="text-align:right"><b class="green">${plan.coverage?Math.round(plan.coverage*100)+"%":"Off"}</b><p>${tier==="off"?"No premium":money(premium)+"/collection"}</p></div></div>
+ <div class="plan-row">${Object.entries(cfg.plans).map(([key,p])=>`<button class="plan-btn ${tier===key?"active":""}" onclick="setInsurancePlan('${type}','${key}')">${p.label}${key!=="off"?`<br><span style="font-size:7px">${Math.round(p.coverage*100)}% cover</span>`:""}</button>`).join("")}</div></div>`
+}
+function settingsPage(){
+ const report=g.lastBackgroundReport;
+ return `<section class="section">${sectionHead("Preferences","Settings")}
+  <div class="card">
+   <div class="settings-group"><div class="settings-label">Appearance</div>
+    <div class="theme-preview">
+      <button class="theme-btn ${g.theme==="system"?"active":""}" onclick="setTheme('system')">📱 System</button>
+      <button class="theme-btn ${g.theme==="dark"?"active":""}" onclick="setTheme('dark')">🌙 Dark</button>
+      <button class="theme-btn ${g.theme==="light"?"active":""}" onclick="setTheme('light')">☀️ Light</button>
+    </div>
+   </div>
+   <div class="settings-group"><div class="settings-label">Display Currency</div>
+    <select class="select" onchange="setCurrency(this.value)">${Object.entries(FX).map(([c,x])=>`<option value="${c}" ${g.currency===c?"selected":""}>${c} — ${x.label}</option>`).join("")}</select>
+    <p style="font-size:9px;color:var(--muted);line-height:1.5;margin:8px 1px 0">Currency changes display values only. The simulation keeps a USD base ledger.</p>
+   </div>
+   <div class="settings-group"><div class="settings-label">Automatic Tax & Insurance Collection</div>
+    <div class="option-grid"><button class="option ${g.collectionIntervalMin===30?"active":""}" onclick="setCollectionInterval(30)">Every 30 minutes</button><button class="option ${g.collectionIntervalMin===60?"active":""}" onclick="setCollectionInterval(60)">Every 1 hour</button></div>
+    <p style="font-size:9px;color:var(--muted);line-height:1.5;margin:8px 1px 0">Government tax recovery and all active insurance premiums are auto-debited on this interval. Android may defer background execution to protect battery; elapsed time is always settled when the app resumes.</p>
+   </div>
+  </div>
+ </section>
+ <section class="section" id="insuranceSection">${sectionHead("Protection","Insurance Portfolio",`<span class="section-action">${activeInsuranceCount()} active</span>`)}
+  <div class="card"><div class="metrics">${metric("Premium / Collection",money(insurancePremiumTotal()),insurancePremiumTotal()?"amber":"")}${metric("Premium Paid",money(g.insurancePaidTotal))}${metric("Claims Received",money(g.insuranceClaimsTotal),"green")}${metric("Arrears",money(g.insuranceArrears),g.insuranceArrears?"red":"green")}</div></div>
+  <div class="insurance-list">${Object.keys(INSURANCE).map(insuranceCard).join("")}</div>
+ </section>
+ <section class="section">${sectionHead("Background","Offline Economy")}
+  <div class="offline-note"><b style="color:var(--white)">Background simulation is active.</b><br>Income, tax accrual, automatic collections and disaster-risk windows continue from real elapsed time even when the app is closed. A native Android background worker also performs periodic settlement when the OS permits it.</div>
+  ${report?`<div class="card" style="margin-top:10px"><div class="metrics">${metric("Offline Earnings",money(report.earnings||0),"green")}${metric("Cycles Settled",num(report.cycles||0))}${metric("Tax Collected",money(report.taxCollected||0))}${metric("Premiums Collected",money(report.premiums||0))}</div><p style="font-size:9px;color:var(--muted);margin:10px 0 0">${report.events||0} risk event(s) processed during the last offline settlement.</p></div>`:""}
+ </section>
+ <section class="section">${sectionHead("Economy","Government & Risk")}
+  <div class="card"><div class="metrics">${metric("Tax Rate",(g.taxRate*100).toFixed(0)+"%")}${metric("Tax Due",money(g.taxDue),g.taxDue?"amber":"green")}${metric("Tax Recovered",money(g.taxRecovered))}${metric("Disaster Loss",money(g.disasterLossTotal),g.disasterLossTotal?"red":"")}</div><button class="btn wide outline" onclick="payTaxNow()">Pay Outstanding Tax</button></div>
+ </section>
+ <section class="section">${sectionHead("Data","Local Game Save")}
+  <div class="card"><p style="font-size:10px;color:var(--muted);line-height:1.55;margin:0">Progress is saved locally and synchronized with the Android background-economy worker.</p><button class="btn wide danger" onclick="resetGame()">Reset Game Data</button></div>
+ </section>
+ <section class="section">${sectionHead("About","Business Tycoon")}
+  <div class="card"><div class="statement"><span>Version</span><b>3.0.0</b></div><div class="statement"><span>Market engine</span><b>5-second random walk</b></div><div class="statement"><span>Economy</span><b>Background + tax + insurance + risk</b></div><div class="statement"><span>Data</span><b>Offline / local + native worker</b></div></div>
+ </section>`
+}
+function render(){
+ header();
+ const view=document.getElementById("view");
+ view.innerHTML=tab==="company"?companyPage():tab==="assets"?assetsPage():tab==="business"?businessPage():tab==="market"?marketPage():settingsPage();
+ save();syncNativeState()
+}
+function withCash(cost,fn,msg="Insufficient cash"){if(g.cash<cost){toast(msg);return false}g.cash-=cost;fn();render();return true}
+function hire(name){const d=STAFF.find(x=>x.name===name);withCash(d.cost,()=>g.staff[name]=(g.staff[name]||0)+1)}
+function upgradeEfficiency(){const c=55000*Math.pow(1.7,g.efficiency-1);withCash(c,()=>{g.efficiency++;g.level++})}
+function unlockTerritory(name){const d=TERR.find(x=>x.name===name);if(g.territories.includes(name))return;withCash(d.cost,()=>{g.territories.push(name);g.level++},"Expansion capital is too low")}
+function setAssetMode(v){assetMode=v;render()}
+function buyProperty(name){const d=PROP.find(x=>x.name===name),st=g.properties[name];withCash(d.buy,()=>st.owned++)}
+function rentOut(name){const st=g.properties[name];if(st.rented>=st.owned)return toast("No vacant unit available");st.rented++;render();toast("Property placed on rent")}
+function endRent(name){const st=g.properties[name];if(st.rented<=0)return;st.rented--;render()}
+function upgradeProperty(name){const d=PROP.find(x=>x.name===name),st=g.properties[name];if(st.owned<=0)return toast("Purchase this property first");const c=d.upgrade*Math.pow(1.55,st.level-1);withCash(c,()=>st.level++)}
+function sellProperty(name){const d=PROP.find(x=>x.name===name),st=g.properties[name];if(st.owned-st.rented<=0)return toast("Vacate a unit before selling");const sale=propertyValueDef(d,st)*.92;st.owned--;g.cash+=sale;render();toast("Property sold")}
+function buyVehicle(name){const d=VEH.find(x=>x.name===name),st=g.vehicles[name];withCash(d.buy,()=>st.owned++)}
+function upgradeVehicle(name){const d=VEH.find(x=>x.name===name),st=g.vehicles[name];if(st.owned<=0)return toast("Buy this vehicle first");const c=d.upgrade*Math.pow(1.5,st.level-1);withCash(c,()=>st.level++)}
+function sellVehicle(name){const d=VEH.find(x=>x.name===name),st=g.vehicles[name];if(st.owned<=0)return;g.cash+=vehicleValueDef(d,st)*d.resale;st.owned--;render();toast("Vehicle sold")}
+function setBizFilter(v){bizFilter=v;render()}
+function buyBusiness(name){const d=BIZ.find(x=>x.name===name),st=g.businesses[name];withCash(d.cost,()=>{st.owned++;g.level++})}
+function upgradeBusiness(name){const d=BIZ.find(x=>x.name===name),st=g.businesses[name];if(st.owned<=0)return toast("Acquire this business first");const c=d.upgrade*Math.pow(1.58,st.level-1);withCash(c,()=>{st.level++;g.level++})}
+function sellBusiness(name){const d=BIZ.find(x=>x.name===name),st=g.businesses[name];if(st.owned<=0)return;g.cash+=d.cost*Math.pow(1.12,st.level-1)*.72;st.owned--;render();toast("Business sold")}
+function changeQty(name,delta){g.tradeQty[name]=Math.max(1,Math.min(100,(g.tradeQty[name]||1)+delta));render()}
+function trade(name,side){const m=g.market[name],q=g.tradeQty[name]||1,total=m.p*q;if(side==="buy"){if(g.cash<total)return toast("Insufficient cash");g.cash-=total;g.inventory[name]+=q}else{if(g.inventory[name]<q)return toast("Not enough inventory");g.inventory[name]-=q;g.cash+=total}render()}
+function marketTick(){for(const [name,m] of Object.entries(g.market)){const shock=(Math.random()-.5)*2*m.v,mean=((m.base-m.p)/m.base)*.006,drift=name==="Gold"?.0003:.00015;m.prev=m.p;m.p=Math.max(m.base*.22,m.p*(1+drift+shock+mean));m.history.push(Number(m.p.toFixed(2)));m.history=m.history.slice(-30)}render()}
+function collectInsurancePremiums(silent=false){
+ const premium=insurancePremiumTotal();
+ if(premium<=0)return 0;
+ g.cash-=premium;g.insurancePaidTotal+=premium;
+ if(!silent)toast(`Insurance premiums auto-collected · ${money(premium)}`);
+ return premium
+}
+function recoverTax(silent=false){
+ if(g.taxDue<=0)return 0;
+ const paid=Math.max(0,Math.min(Math.max(0,g.cash),g.taxDue));
+ g.cash-=paid;g.taxDue-=paid;g.taxRecovered+=paid;
+ if(g.taxDue>0){const penalty=g.taxDue*.05;g.taxDue+=penalty;if(!silent)toast("Tax recovery partial · 5% penalty added")}
+ else if(!silent)toast("Government tax recovered automatically");
+ return paid
+}
+function processScheduledCollection(silent=false){
+ const premium=collectInsurancePremiums(true),tax=recoverTax(true);
+ if(!silent)toast(`Auto collection · tax ${money(tax)} · insurance ${money(premium)}`);
+ return {premium,tax}
+}
+function accrueCycle(){
+ const gross=passiveGross();g.cash+=gross;g.totalEarned+=Math.max(0,gross);g.taxDue+=Math.max(0,gross)*g.taxRate;g.lastEconomyAt=Date.now();render()
+}
+function restartPassive(){clearInterval(passiveTimer);passiveTimer=setInterval(accrueCycle,g.instant?100:5000)}
+function payTaxNow(){if(g.taxDue<=0)return toast("No outstanding tax");const paid=recoverTax(true);toast(g.taxDue>0?`Partial tax payment · ${money(paid)}`:`Tax fully paid · ${money(paid)}`);render()}
+function autoTaxRecovery(){const r=processScheduledCollection(false);g.lastCollectionAt=Date.now();render();return r}
+function triggerDisaster(forced=false,silent=false,eventOverride=null){
+ const d=eventOverride||DISASTERS[Math.floor(Math.random()*DISASTERS.length)],nw=Math.max(50000,Math.abs(netWorth())),gross=Math.min(750000,Math.max(1500,nw*d.sev*(.7+Math.random()*.7))),rate=insuranceCoverageFor(d),covered=gross*rate,net=gross-covered;
+ g.cash-=net;g.disasterLossTotal+=net;g.insuranceClaimsTotal+=covered;g.lastDisaster={...d,grossLoss:gross,covered,netLoss:net,coverageRate:rate,at:Date.now()};
+ if(!silent){render();toast(`${d.emoji} ${d.name}: net loss ${money(net)}`)}
+ return {gross,covered,net,event:d}
+}
+function forceDisaster(){triggerDisaster(true)}
+function setInsurancePlan(type,tier){
+ if(!INSURANCE[type]||!INSURANCE[type].plans[tier])return;
+ g.insurancePlans[type]=tier;render();toast(`${INSURANCE[type].label}: ${INSURANCE[type].plans[tier].label}`)
+}
+function setCollectionInterval(min){
+ g.collectionIntervalMin=min;g.lastCollectionAt=Date.now();scheduleNativeWorker();render();toast(`Auto collection set to every ${min===60?"1 hour":"30 minutes"}`)
+}
+function applyTheme(){
+ let mode=g.theme||"dark";
+ if(mode==="system")mode=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";
+ document.documentElement.dataset.theme=mode;
+ const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute("content",mode==="light"?"#f8fafc":"#0B132B");
+ try{if(window.AndroidGame&&AndroidGame.setSystemBars)AndroidGame.setSystemBars(mode)}catch(e){}
+}
+function setTheme(mode){if(!["system","dark","light"].includes(mode))return;g.theme=mode;applyTheme();render();toast(`Theme changed to ${mode}`)}
+function openSettingsInsurance(){tab="settings";document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.tab==="settings"));render();setTimeout(()=>document.getElementById("insuranceSection")?.scrollIntoView({behavior:"smooth"}),60)}
+function nativeSnapshot(){
+ return {
+  updatedAt:Date.now(),cash:g.cash,totalEarned:g.totalEarned,taxDue:g.taxDue,taxRecovered:g.taxRecovered,
+  disasterLossTotal:g.disasterLossTotal,insurancePaidTotal:g.insurancePaidTotal,insuranceClaimsTotal:g.insuranceClaimsTotal,
+  lastEconomyAt:g.lastEconomyAt,lastCollectionAt:g.lastCollectionAt,lastRiskAt:g.lastRiskAt,
+  passiveGross:passiveGross(),taxRate:g.taxRate,collectionIntervalMin:g.collectionIntervalMin,
+  premiumTotal:insurancePremiumTotal(),netWorth:netWorth(),
+  coverage:Object.fromEntries(Object.keys(INSURANCE).map(k=>[k,insurancePlan(k).coverage||0])),
+  lastDisaster:g.lastDisaster
+ }
+}
+let nativeSyncTimer=null;
+function syncNativeState(){
+ try{
+  if(window.AndroidGame&&AndroidGame.syncBackgroundState){
+   clearTimeout(nativeSyncTimer);nativeSyncTimer=setTimeout(()=>AndroidGame.syncBackgroundState(JSON.stringify(nativeSnapshot())),120)
+  }
+ }catch(e){}
+}
+function scheduleNativeWorker(){try{if(window.AndroidGame&&AndroidGame.scheduleBackground)AndroidGame.scheduleBackground(Number(g.collectionIntervalMin)||60)}catch(e){}}
+function pullNativeState(){
+ try{
+  if(!(window.AndroidGame&&AndroidGame.getBackgroundState))return false;
+  const raw=AndroidGame.getBackgroundState();if(!raw)return false;const n=JSON.parse(raw);
+  if(!n.updatedAt||n.updatedAt<=Number(g.nativeAppliedAt||0)||n.lastEconomyAt<=g.lastEconomyAt)return false;
+  ["cash","totalEarned","taxDue","taxRecovered","disasterLossTotal","insurancePaidTotal","insuranceClaimsTotal","lastEconomyAt","lastCollectionAt","lastRiskAt"].forEach(k=>{if(Number.isFinite(Number(n[k])))g[k]=Number(n[k])});
+  if(n.lastDisaster)g.lastDisaster=n.lastDisaster;g.nativeAppliedAt=n.updatedAt;save();return true
+ }catch(e){return false}
+}
+function settleOfflineProgress(show=true){
+ pullNativeState();
+ const now=Date.now(),cycleMs=5000,elapsed=Math.max(0,now-(Number(g.lastEconomyAt)||now)),cycles=Math.floor(elapsed/cycleMs);
+ let earnings=0,taxCollected=0,premiums=0,events=0;
+ if(cycles>0){
+  earnings=passiveGross()*cycles;g.cash+=earnings;g.totalEarned+=Math.max(0,earnings);g.taxDue+=Math.max(0,earnings)*g.taxRate;g.lastEconomyAt+=cycles*cycleMs
+ }
+ const intervalMs=(Number(g.collectionIntervalMin)||60)*60000;
+ let collections=Math.floor(Math.max(0,now-(Number(g.lastCollectionAt)||now))/intervalMs);
+ collections=Math.min(collections,720);
+ for(let i=0;i<collections;i++){const r=processScheduledCollection(true);premiums+=r.premium;taxCollected+=r.tax;g.lastCollectionAt+=intervalMs}
+ const riskMs=30*60000;let riskBlocks=Math.floor(Math.max(0,now-(Number(g.lastRiskAt)||now))/riskMs);riskBlocks=Math.min(riskBlocks,4320);
+ for(let i=0;i<riskBlocks;i++){if(Math.random()<.12){triggerDisaster(false,true);events++}g.lastRiskAt+=riskMs}
+ if(cycles||collections||riskBlocks){
+  g.lastBackgroundReport={earnings,cycles,taxCollected,premiums,events,at:now};save();syncNativeState();
+  if(show&&(cycles>0||collections>0||events>0))toast(`Background settled · +${money(earnings)} · ${events} event${events===1?"":"s"}`)
+ }
+ return {earnings,cycles,taxCollected,premiums,events}
+}
+function marketFactor(f,msg){for(const m of Object.values(g.market)){m.prev=m.p;m.p=Math.max(.01,m.p*f);m.history.push(Number(m.p.toFixed(2)));m.history=m.history.slice(-30)}render();toast(msg)}
+function inject(field,id){const v=Number(document.getElementById(id).value);if(!Number.isFinite(v)||v<=0)return toast("Enter a positive amount");g[field]+=v;document.getElementById(id).value="";render();toast("Resource injected")}
+function toggleInstant(){g.instant=!g.instant;restartPassive();render()}
+function maximize(){g.level=100;g.rank="Global Tycoon";g.efficiency=25;g.staff={Analyst:25,Manager:25,Director:25};g.territories=["Home Market",...TERR.map(x=>x.name)];for(const d of PROP)g.properties[d.name]={owned:10,rented:8,level:10};for(const d of VEH)g.vehicles[d.name]={owned:10,level:10};for(const d of BIZ)g.businesses[d.name]={owned:10,level:10};render();toast("All levels maximized")}
+function setCurrency(c){if(FX[c])g.currency=c;render();toast(`Currency changed to ${c}`)}
+function resetGame(){if(!confirm("Reset all Business Tycoon progress on this device?"))return;localStorage.removeItem("bt-v3");localStorage.removeItem("bt-v2");localStorage.removeItem("bt-mobile");g=loadGame();render();restartPassive();toast("Game reset")}
+function closeAdmin(){document.getElementById("adminModal").classList.remove("show")}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x===b));render();window.scrollTo({top:0,behavior:"smooth"})});
+const brand=document.getElementById("brand");
+brand.onpointerdown=()=>{clearTimeout(pressTimer);pressTimer=setTimeout(()=>{document.getElementById("adminModal").classList.add("show");if(navigator.vibrate)navigator.vibrate(45)},3000)};
+["onpointerup","onpointercancel","onpointerleave"].forEach(k=>brand[k]=()=>clearTimeout(pressTimer));
+setInterval(marketTick,5000);
+setInterval(()=>{
+ const now=Date.now(),interval=(Number(g.collectionIntervalMin)||60)*60000;
+ if(now-g.lastCollectionAt>=interval){const count=Math.min(12,Math.floor((now-g.lastCollectionAt)/interval));for(let i=0;i<count;i++){processScheduledCollection(true);g.lastCollectionAt+=interval}if(tab==="company"||tab==="settings")render()}
+ if(now-g.lastRiskAt>=30*60000){const blocks=Math.min(8,Math.floor((now-g.lastRiskAt)/(30*60000)));for(let i=0;i<blocks;i++){if(Math.random()<.12)triggerDisaster(false,true);g.lastRiskAt+=30*60000}if(tab==="company"||tab==="settings")render()}
+},15000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){settleOfflineProgress(true);render()}else{g.lastEconomyAt=Date.now();save();syncNativeState()}});
+window.addEventListener("pageshow",()=>{settleOfflineProgress(false);render()});
+if(window.matchMedia)window.matchMedia("(prefers-color-scheme: light)").addEventListener?.("change",()=>{if(g.theme==="system"){applyTheme();render()}});
+applyTheme();settleOfflineProgress(true);scheduleNativeWorker();restartPassive();render();
+</script>
+</body></html>
