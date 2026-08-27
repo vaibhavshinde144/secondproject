@@ -1,0 +1,50 @@
+name: Build Business Tycoon v4 APK
+
+on:
+  push:
+    branches: [business-tycoon-v4]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Reconstruct and verify game app
+        shell: bash
+        run: |
+          set -e
+          cd business-tycoon-v4-android/app/src/main/assets
+          cat chunks/part*.b64 | base64 -d | gzip -d > index.html
+          echo "a92517d63b53b03419f775b8b2fe34c855a8fe4e3d1961c7f637178169908933  index.html" | sha256sum -c -
+          rm -rf chunks
+          test -s index.html
+
+      - name: Build Android APK
+        working-directory: business-tycoon-v4-android
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Rename APK
+        run: cp business-tycoon-v4-android/app/build/outputs/apk/debug/app-debug.apk Business-Tycoon-v4.0.0.apk
+
+      - name: Verify APK archive
+        run: unzip -t Business-Tycoon-v4.0.0.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Business-Tycoon-v4-Android-APK
+          path: Business-Tycoon-v4.0.0.apk
+          if-no-files-found: error
